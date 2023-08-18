@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Example</title>
+    <link rel="stylesheet" id="theme" href="../themes/xpager.theme.light.css">
+    <style>
+        #pager {
+            padding: 5px 0;
+        }
+
+        .dark {
+            background-color: #303030;
+            color: #ececec;
+        }
+
+        .dark > #pager {
+            background-color: #494949;
+        }
+
+        .light {
+            background-color: #ffffff;
+            color: initial;
+        }
+
+        .light #pager {
+            background-color: #f1f1f1;
+        }
+    </style>
+</head>
+<body class="light">
+<div style="display: flex;align-items: baseline">
+    <h1>XPager Basic Example</h1>
+    <label for="theme-check" style="margin-left: 20px">Theme: <input id="theme-check" type="checkbox"> dark?</label>
+</div>
+<div id="pager" style=""></div>
+<p id="output"></p>
+<script src="../xpager.umd.min.js"></script>
+<script>
+    const data = new Array(145);
+
+    const pager = xpager.init(document.getElementById('pager'));
+
+    pager.of(data, {
+        success: (list, event) => {
+            document.getElementById('output').innerHTML = 'Page event: ' + JSON.stringify(event, null, ' ');
+        }
+    });
+
+    document.getElementById('theme-check').addEventListener('click', function (e) {
+        let c = 'light';
+        if (this.checked) {
+            c = 'dark';
+        }
+        document.body.className = c;
+        document.getElementById('theme').href = `../themes/xpager.theme.${c}.css`;
+    });
+</script>
+</body>
+</html>

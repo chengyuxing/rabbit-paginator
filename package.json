@@ -1,0 +1,36 @@
+{
+  "name": "x-paginator",
+  "version": "1.0.0",
+  "description": "a simple paginator support ajax request and array paging.",
+  "scripts": {
+    "build": "rollup --config",
+    "buildesm2015": "rollup --config rollup.config.esm2015.mjs",
+    "publish": "npm publish"
+  },
+  "module": "dist/xpager/esm2015/xpager.mjs",
+  "typings": "dist/xpager/lib/index.d.ts",
+  "type": "module",
+  "files": [
+    "dist/"
+  ],
+  "private": false,
+  "keywords": [
+    "ajax",
+    "paging",
+    "paginator",
+    "page-helper",
+    "pageable"
+  ],
+  "author": "chengyuxing",
+  "license": "MIT",
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.4",
+    "@rollup/plugin-terser": "^0.4.3",
+    "@rollup/plugin-typescript": "^11.1.2",
+    "@types/node": "^20.3.3",
+    "rollup": "^3.28.0",
+    "ts-loader": "^9.4.4",
+    "tslib": "^2.6.1",
+    "typescript": "^5.1.6"
+  }
+}

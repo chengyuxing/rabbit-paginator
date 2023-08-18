@@ -1,0 +1,12 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "target": "ES5",
+    "outDir": "lib",
+    "declaration": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "files": [
+
+  ]
+}
