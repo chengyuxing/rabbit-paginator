@@ -6,7 +6,7 @@
     "build": "rollup --config",
     "buildesm2015": "rollup --config rollup.config.esm2015.mjs"
   },
-  "module": "dist/esm2015/xpager.mjs",
+  "module": "dist/esm2015/axpager.mjs",
   "types": "dist/lib/index.d.ts",
   "type": "module",
   "files": [
