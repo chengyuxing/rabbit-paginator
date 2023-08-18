@@ -17,6 +17,7 @@
   "private": false,
   "keywords": [
     "ajax",
+    "ajax-paging",
     "paging",
     "paginator",
     "page-helper",
