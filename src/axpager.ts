@@ -63,7 +63,7 @@ const updateRangeLabel = Symbol('updateRangeLabel');
  * paginator support ajax request and static array data paging.
  * @author chengyuxingo@gmail.com
  */
-export class xpager {
+export class axpager {
     private container!: HTMLElement;
     private config: PageConfig = {};
     private target: string | any[];
@@ -238,8 +238,8 @@ export class xpager {
      * @param config config
      * @return xpager paginator
      */
-    static init(container: HTMLElement, config?: PageConfig): xpager {
-        return new xpager(container, config);
+    static init(container: HTMLElement, config?: PageConfig): axpager {
+        return new axpager(container, config);
     }
 
     [initDomElements]() {

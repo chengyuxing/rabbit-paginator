@@ -6,13 +6,13 @@ export default {
     input: './src/index.ts',
     output: [
         {
-            file: 'dist/xpager.umd.js',
+            file: 'dist/axpager.umd.js',
             format: 'umd',
-            name: 'xpager'
+            name: 'axpager'
         }, {
-            file: 'dist/xpager.umd.min.js',
+            file: 'dist/axpager.umd.min.js',
             format: 'umd',
-            name: 'xpager',
+            name: 'axpager',
             sourcemap: true,
             plugins: [terser()]
         }

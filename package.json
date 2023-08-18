@@ -1,5 +1,5 @@
 {
-  "name": "xpager",
+  "name": "axpager",
   "version": "1.0.0",
   "description": "a simple paginator support ajax request and array paging.",
   "scripts": {

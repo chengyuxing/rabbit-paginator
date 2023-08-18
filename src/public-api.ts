@@ -1,13 +1,13 @@
 import {PageConfig} from "./config/page-config";
-import {xpager, createElement} from "./xpager";
+import {axpager, createElement} from "./axpager";
 
 /**
  * init a new paginator instance.
  */
-const init: (container: HTMLElement, config: PageConfig) => xpager = xpager.init;
+const init: (container: HTMLElement, config: PageConfig) => axpager = axpager.init;
 
 export {
-    xpager as Paginator,
+    axpager as Paginator,
     init,
     createElement
 };

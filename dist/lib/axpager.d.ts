@@ -11,7 +11,7 @@ declare const updateRangeLabel: unique symbol;
  * paginator support ajax request and static array data paging.
  * @author chengyuxingo@gmail.com
  */
-export declare class xpager {
+export declare class axpager {
     private container;
     private config;
     private target;
@@ -51,7 +51,7 @@ export declare class xpager {
      * @param config config
      * @return xpager paginator
      */
-    static init(container: HTMLElement, config?: PageConfig): xpager;
+    static init(container: HTMLElement, config?: PageConfig): axpager;
     [initDomElements](): void;
     /**
      * ajax request paging.

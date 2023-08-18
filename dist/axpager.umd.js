@@ -1,7 +1,7 @@
 (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
     typeof define === 'function' && define.amd ? define(['exports'], factory) :
-    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.xpager = {}));
+    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.axpager = {}));
 })(this, (function (exports) { 'use strict';
 
     var ContentType = {
@@ -61,13 +61,13 @@
      * paginator support ajax request and static array data paging.
      * @author chengyuxingo@gmail.com
      */
-    var xpager = /** @class */ (function () {
+    var axpager = /** @class */ (function () {
         /**
          * paginator.
          * @param container container element
          * @param config config
          */
-        function xpager(container, config) {
+        function axpager(container, config) {
             var _this = this;
             this.config = {};
             this.previousPage = 1;
@@ -171,7 +171,7 @@
             });
             this[initDomElements]();
         }
-        Object.defineProperty(xpager.prototype, "pages", {
+        Object.defineProperty(axpager.prototype, "pages", {
             /**
              * total pages count.
              */
@@ -181,7 +181,7 @@
             enumerable: false,
             configurable: true
         });
-        Object.defineProperty(xpager.prototype, "pageParams", {
+        Object.defineProperty(axpager.prototype, "pageParams", {
             /**
              * ajax paging request page params.
              */
@@ -194,7 +194,7 @@
             enumerable: false,
             configurable: true
         });
-        Object.defineProperty(xpager.prototype, "pageEvent", {
+        Object.defineProperty(axpager.prototype, "pageEvent", {
             /**
              * page event.
              */
@@ -219,10 +219,10 @@
          * @param config config
          * @return xpager paginator
          */
-        xpager.init = function (container, config) {
-            return new xpager(container, config);
+        axpager.init = function (container, config) {
+            return new axpager(container, config);
         };
-        xpager.prototype[initDomElements] = function () {
+        axpager.prototype[initDomElements] = function () {
             var _this = this;
             this.actions.selectPageSize.innerHTML = this.config.pageSizeOptions.map(function (num) { return "<option value=\"".concat(num, "\">").concat(num, "</option>"); }).join('');
             this.labels.itemsPerPageLabel.innerHTML = this.config.itemsPerPageLabel + (this.config.showPageSizeOptions ? '' : this.config.pageSizeOptions[0] || 10);
@@ -250,7 +250,7 @@
          * @param url url
          * @param option option
          */
-        xpager.prototype.ajax = function (url, option) {
+        axpager.prototype.ajax = function (url, option) {
             var _this = this;
             if (!(typeof url === 'string')) {
                 throw Error('Request url is required.');
@@ -331,7 +331,7 @@
          * @param data array
          * @param option option
          */
-        xpager.prototype.resource = function (data, option) {
+        axpager.prototype.resource = function (data, option) {
             var _this = this;
             if (!(data instanceof Array)) {
                 throw Error('data must be an Array.');
@@ -353,7 +353,7 @@
          * @param target url or static array data
          * @param option option
          */
-        xpager.prototype.of = function (target, option) {
+        axpager.prototype.of = function (target, option) {
             if (typeof target === 'string') {
                 this.ajax(target, option);
                 return;
@@ -367,13 +367,13 @@
         /**
          * refresh current page's data.
          */
-        xpager.prototype.refresh = function () {
+        axpager.prototype.refresh = function () {
             this.of(this.target, this.option);
         };
-        xpager.prototype[updateRangeLabel] = function () {
+        axpager.prototype[updateRangeLabel] = function () {
             this.labels.rangeLabel.innerHTML = this.config.getRangeLabel(this.currentPage, this.size, this.length);
         };
-        xpager.prototype[updateActionStatus] = function (page, pages, length) {
+        axpager.prototype[updateActionStatus] = function (page, pages, length) {
             var a = page === 1;
             var b = pages === 1 || page === pages;
             var ra = "mat-btn".concat(a ? '' : ' mat-ripple-btn');
@@ -388,15 +388,15 @@
             this.actions.btnLast.disabled = b;
             this.actions.btnLast.className = rb;
         };
-        return xpager;
+        return axpager;
     }());
 
     /**
      * init a new paginator instance.
      */
-    var init = xpager.init;
+    var init = axpager.init;
 
-    exports.Paginator = xpager;
+    exports.Paginator = axpager;
     exports.createElement = createElement;
     exports.init = init;
 

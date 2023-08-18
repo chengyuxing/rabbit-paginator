@@ -5,9 +5,9 @@ export default {
     input: './src/index.ts',
     output: [
         {
-            file: 'dist/esm2015/xpager.mjs',
+            file: 'dist/esm2015/axpager.mjs',
             format: 'esm',
-            name: 'xpager',
+            name: 'axpager',
             sourcemap: true,
         }
     ],

@@ -7,21 +7,21 @@ A useful paginator support ajax request paging and static array data paging.
 ### ES2015 via npm
 
 ```shell
-npm install xpager
+npm install axpager
 ```
 
 ### Web via script link
 
 ```html
 
-<script src="dist/xpager.umd.js"></script>
+<script src="dist/axpager.umd.js"></script>
 ```
 
 ### Themes
 
 ```html
 
-<link rel="stylesheet" href="dist/themes/xpager.theme.light.css">
+<link rel="stylesheet" href="dist/themes/axpager.theme.light.css">
 ```
 
 ## Usage
@@ -29,13 +29,13 @@ npm install xpager
 ### ES2015
 
 ```javascript
-import {Paginator} from 'xpager';
+import {Paginator} from 'axpager';
 ```
 
 ### UMD
 
 ```javascript
-const {Paginator} = xpager;
+const {Paginator} = axpager;
 ```
 
 ### Example

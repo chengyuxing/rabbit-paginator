@@ -6,7 +6,7 @@
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Example</title>
-    <link rel="stylesheet" id="theme" href="../themes/xpager.theme.light.css">
+    <link rel="stylesheet" id="theme" href="../themes/axpager.theme.light.css">
     <style>
         #pager {
             padding: 5px 0;
@@ -38,10 +38,10 @@
 </div>
 <div id="pager" style=""></div>
 <p id="output"></p>
-<script src="../xpager.umd.min.js"></script>
+<script src="../axpager.umd.min.js"></script>
 <script>
     const data = new Array(145);
-    const {Paginator} = xpager;
+    const {Paginator} = axpager;
     const pager = Paginator.init(document.getElementById('pager'));
 
     pager.of(data, {
@@ -56,7 +56,7 @@
             c = 'dark';
         }
         document.body.className = c;
-        document.getElementById('theme').href = `../themes/xpager.theme.${c}.css`;
+        document.getElementById('theme').href = `../themes/axpager.theme.${c}.css`;
     });
 </script>
 </body>
