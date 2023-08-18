@@ -1,6 +1,6 @@
-import {PageConfig} from "./types/page-config";
-import {RequestOption} from "./types/request-option";
-import {PageEvent} from "./types/page-event";
+import {PageConfig} from "./config/page-config";
+import {RequestOption} from "./config/request-option";
+import {PageEvent} from "./config/page-event";
 
 const ContentType = {
     JSON: 'application/json',
@@ -274,7 +274,7 @@ export class xpager {
      * @param option option
      */
     ajax(url: String, option?: RequestOption) {
-        if (!(url instanceof String)) {
+        if (!(typeof url === 'string')) {
             throw Error('Request url is required.');
         }
         const that = this;
@@ -382,7 +382,7 @@ export class xpager {
      * @param option option
      */
     of(target: String | any[], option?: RequestOption) {
-        if (target instanceof String) {
+        if (typeof target === 'string') {
             this.ajax(target, option);
             return;
         }

@@ -6,11 +6,11 @@ export default {
     input: './src/index.ts',
     output: [
         {
-            file: 'dist/xpager/xpager.umd.js',
+            file: 'dist/xpager.umd.js',
             format: 'umd',
             name: 'xpager'
         }, {
-            file: 'dist/xpager/xpager.umd.min.js',
+            file: 'dist/xpager.umd.min.js',
             format: 'umd',
             name: 'xpager',
             sourcemap: true,

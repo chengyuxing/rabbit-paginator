@@ -41,8 +41,8 @@
 <script src="../xpager.umd.min.js"></script>
 <script>
     const data = new Array(145);
-
-    const pager = xpager.init(document.getElementById('pager'));
+    const {Paginator} = xpager;
+    const pager = Paginator.init(document.getElementById('pager'));
 
     pager.of(data, {
         success: (list, event) => {
