@@ -1,4 +1,4 @@
-# x-paginator
+# ajax-paginator
 
 A useful paginator support ajax request paging and static array data paging.
 
