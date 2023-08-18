@@ -7,7 +7,7 @@ A useful paginator support ajax request paging and static array data paging.
 ### ES2015 via npm
 
 ```shell
-npm install x-pager
+npm install xpager
 ```
 
 ### Web via script link

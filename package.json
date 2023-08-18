@@ -25,6 +25,11 @@
   ],
   "author": "chengyuxing",
   "license": "MIT",
+  "repository": {
+    "type": "GIT",
+    "url": "https://github.com/chengyuxing/rabbit-paginator.git"
+  },
+  "homepage": "https://github.com/chengyuxing/rabbit-paginator",
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.4",
     "@rollup/plugin-terser": "^0.4.3",
