@@ -252,7 +252,7 @@
          */
         xpager.prototype.ajax = function (url, option) {
             var _this = this;
-            if (!(url instanceof String)) {
+            if (!(typeof url === 'string')) {
                 throw Error('Request url is required.');
             }
             var that = this;
@@ -354,7 +354,7 @@
          * @param option option
          */
         xpager.prototype.of = function (target, option) {
-            if (target instanceof String) {
+            if (typeof target === 'string') {
                 this.ajax(target, option);
                 return;
             }

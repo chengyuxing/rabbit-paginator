@@ -230,7 +230,7 @@ class xpager {
      * @param option option
      */
     ajax(url, option) {
-        if (!(url instanceof String)) {
+        if (!(typeof url === 'string')) {
             throw Error('Request url is required.');
         }
         const that = this;
@@ -331,7 +331,7 @@ class xpager {
      * @param option option
      */
     of(target, option) {
-        if (target instanceof String) {
+        if (typeof target === 'string') {
             this.ajax(target, option);
             return;
         }
