@@ -215,10 +215,7 @@ export class axpager {
      * ajax paging request page params.
      */
     get pageParams() {
-        return {
-            page: this.currentPage,
-            size: this.size
-        };
+        return this.config.getPageParams(this.currentPage, this.size);
     }
 
     /**
