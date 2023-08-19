@@ -2,7 +2,7 @@ import {ContentType, AjaxAdapter} from "../ajax-adapter";
 import {RequestInitOption} from "../../config/request-option";
 
 /**
- * based on fetch api adapter.
+ * Based on fetch api adapter.
  */
 export class FetchAdapter implements AjaxAdapter {
     request(url: string, pageParams: {}, option: RequestInitOption): Promise<any> {
