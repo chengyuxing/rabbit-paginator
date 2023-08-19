@@ -1,6 +1,6 @@
 # ajax-paginator
 
-A useful paginator support ajax request paging and static array data paging.
+A useful paginator supports ajax request and static array data paging.
 
 ## Installation
 
@@ -13,14 +13,12 @@ npm install axpager
 **Web via script link**
 
 ```html
-
 <script src="dist/axpager.umd.js"></script>
 ```
 
 **Themes**
 
 ```html
-
 <link rel="stylesheet" href="dist/themes/axpager.theme.light.css">
 ```
 
@@ -40,7 +38,7 @@ const {Paginator} = axpager;
 
 **Example**
 
-Rewrite function `getPagedResource`  to adapt  **ajax request paging** if  your response data format cannot match `{data: any[], length: number}`:
+Rewrite function `getPagedResource`  to adapt  **ajax request paging** if  your response data format cannot match `{data: any[], length: number}` :
 
 ```javascript
 // Bulit-in default implementation.
@@ -60,3 +58,215 @@ pager.of(url | data, {
     }
 });
 ```
+
+## Constructor
+
+**Paginator**(container: HTMLElement, config?: [PageConfig](#PageConfig))
+
+**Static method**: **init**(container: HTMLElement, config?: [PageConfig](#PageConfig))
+
+### Instance properties
+
+- **pages** `readonly`
+
+  Total pages.
+
+- **pageParams** `readonly`
+
+  Ajax paging request page params.
+
+- **pageEvent** `readonly`
+
+  Paging event data.
+
+### Instance methods
+
+- **ajax**(url: string, option?: [RequestOption](#RequestOption))
+
+  Ajax request paging.
+
+- **resource**(data: any[], option?: [RequestOption](#RequestOption))
+
+  Static array data paging.
+
+- **of**(target: string | any[], option?: [RequestOption](#RequestOption))
+
+  request paging, **ajax** or **resource** will be called depends on target type.
+
+- **refresh**()
+
+  Refresh current page's data.
+
+## Configuration
+
+### PageConfig
+
+#### Properties 
+
+- **itemsPerPageLabel** `optional`
+
+  Items per page lebel text, default `每页条数` .
+
+- **hidePageSize** `optional`
+
+  Hide page size panel( items per page babel and page size options), default `false` .
+
+- **showPageSizeOptions** `optional`
+
+  Show page size options.
+
+- **pageSizeOptions** `optional`
+
+  Page size options, default `[10, 15, 30]` .
+
+- **firstPageLabel** `optional`
+
+  First page button label text, default `第一页` .
+
+- **previousPageLabel** `optional`
+
+  Previous page button label text, default `上一页` .
+
+- **nextPageLabel** `optional`
+
+  Next page button label text, default `上一页` .
+
+- **lastPageLabel** `optional`
+
+  Last page button label text, default `上一页` .
+
+- **ajaxAdapter** `optional`
+
+  ajax paging adapter, custom ajax paging implementation, default `XMLHttpRequestAdapter`  .
+
+#### Methods
+
+- **getRangeLabel** `optional`
+
+  Get range label text, default:
+
+  ```typescript
+  (page: number, size: number, pages: number, length: number) => `第${page}/${pages}页，共${length}条`
+  ```
+
+- **getPageParams** `optional`
+
+  Get necessary ajax request page params, default:
+
+  ```typescript
+  (page, size) => ({page: page, size: size})
+  ```
+
+- **getPagedResource** `optional`
+
+  Get custom paged resource format from ajax request response, default:
+
+  ```typescript
+  response => ({data: response.data, length: response.pager.recordCount})
+  ```
+
+- **changes** `optional`
+
+  Before paging action request changes callback, default:
+
+  ```typescript
+  (pageEvent, eventTarget) => void (0)
+  ```
+
+### RequestOption
+
+#### Properties
+
+- **method** `optional` `ajax` `init`
+
+  AJAX request method, default `GET`, support `POST` .
+
+- **data** `optional` `init`
+
+  Request params such as query parameters from form, default `{}`, support `{}` and `FormData`, data will be parsed:
+
+  - GET: `{}` -> `form-urlencode`
+
+  - POST: 
+
+    `{}` -> `form-urlencode` (default)
+
+    `{}` -> `json` (ContentType:`application/json`)
+
+    `{}` -> `FormData` (ContentType: `multipart/form-data`)
+
+    `FormData` -> `FormData`
+
+- **headers** `optional` `ajax` `init`
+
+  Http headers.
+
+- **timeout** `optional` `ajax` `XMLHttpRequestAdapter` `init`
+
+  Ajax reuqest timeout, default `-1` .
+
+#### Methods
+
+- **before** `optional` `init`
+
+  Before request paging callback, default:
+
+  ```typescript
+  (init: XMLHttpRequest | RequestInit | any) => void (0)
+  ```
+
+- **success**
+
+  Paging request success callback, default:
+
+  ```typescript
+  (data: any[], pageEvent: PageEvent) => void(0)
+  ```
+
+- **error** `optional` `ajax`
+
+  Paging request error callback, default:
+
+  ```typescript
+  (error: any) => void(0)
+  ```
+
+- **finish** `optional`
+
+  Paging request finished callback, default:
+
+  ```typescript
+  () => void(0)
+  ```
+
+- **filter** `optional` `resource`
+
+  Static array data paging filter, such as `Array#filter` , default:
+
+  ```typescript
+  (item: any) => boolean
+  ```
+
+### AjaxAdapter
+
+Basic ajax request paging adapter, built-in:
+
+- **XMLHttpRequestAdapter** ` default`
+
+  Base on XMLHttpRequest default implementation.
+
+- **FetchAdapter**
+
+  Based on fetch api adapter.
+
+#### AjaxAdapter
+
+##### Methods 
+
+- **request**
+
+  ```typescript
+  (url: string, pageParams: {}, reqOption: RequestInitOption): Promise<any>
+  ```
+
+  Request method, resolve response and reject exception.
