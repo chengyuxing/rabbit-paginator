@@ -1,11 +1,7 @@
 import {PageConfig} from "./config/page-config";
-import {RequestOption} from "./config/request-option";
+import {RequestInitOption, RequestOption} from "./config/request-option";
 import {PageEvent} from "./config/page-event";
-
-const ContentType = {
-    JSON: 'application/json',
-    URL_ENCODED: 'application/x-www-form-urlencoded'
-};
+import {XMLHttpRequestAdapter} from "./ajax/adapters/xml-http-request-adapter";
 
 // noinspection JSUnresolvedReference
 /**
@@ -21,7 +17,9 @@ const defaultPageConfig: PageConfig = {
     showFirstLastButtons: true,
     showPageSizeOptions: true,
     pageSizeOptions: [10, 15, 30],
-    getRangeLabel: (page: number, size: number, length: number) => `第${page}/${Math.floor(length / size + 1)}页，共${length}条`,
+    ajaxAdapter: new XMLHttpRequestAdapter(),
+    getRangeLabel: (page: number, size: number, pages: number, length: number) => `第${page}/${pages}页，共${length}条`,
+    getPageParams: (page, size) => ({page: page, size: size}),
     getPagedResource: response => ({data: response.data, length: response.pager.recordCount}),
     changes: (pageEvent, eventTarget) => void (0),
 };
@@ -33,7 +31,7 @@ const defaultRequestOption: RequestOption = {
     data: {},
     headers: {},
     timeout: -1,
-    before: xhr => void (0),
+    before: init => void (0),
     success: (data, pageEvent) => void (0),
     error: error => void 0,
     finish: () => void (0),
@@ -61,7 +59,6 @@ const updateRangeLabel = Symbol('updateRangeLabel');
 
 /**
  * paginator support ajax request and static array data paging.
- * @author chengyuxingo@gmail.com
  */
 export class axpager {
     private container!: HTMLElement;
@@ -87,7 +84,6 @@ export class axpager {
     private length: number = 0;
     private size: number = 0;
     private option: RequestOption;
-    private xhr: XMLHttpRequest;
 
     /**
      * paginator.
@@ -96,11 +92,8 @@ export class axpager {
      */
     constructor(container: HTMLElement, config?: PageConfig) {
         this.container = container;
-        this.container.innerHTML = '<div class="rabbit-pager"></div>';
-
         this.config = Object.assign({}, defaultPageConfig, config);
         this.size = this.config.pageSizeOptions[0] || 10;
-
         this.actions = {
             selectPageSize: createElement('SELECT', {
                 className: 'mat-select mat-size-options',
@@ -244,7 +237,85 @@ export class axpager {
         return new axpager(container, config);
     }
 
+    /**
+     * ajax request paging.
+     * @param url url
+     * @param option option
+     */
+    ajax(url: string, option?: RequestOption) {
+        if (!(typeof url === 'string')) {
+            throw Error('Request url is required.');
+        }
+        this.target = url;
+        this.option = Object.assign({}, defaultRequestOption, option);
+        const initOption: RequestInitOption = {
+            method: this.option.method,
+            data: this.option.data,
+            headers: this.option.headers,
+            timeout: this.option.timeout,
+            before: this.option.before
+        };
+        this.config.ajaxAdapter.request(this.target, this.pageParams, initOption)
+            .then(response => {
+                const {data, length} = this.config.getPagedResource(response);
+                this.length = length;
+                const pageEvent = this.pageEvent;
+                this.option.success(data, pageEvent);
+                this[updateActionStatus](pageEvent.page, pageEvent.pages, pageEvent.length);
+                this[updateRangeLabel]();
+            }).catch(this.option.error)
+            .finally(this.option.finish);
+    }
+
+    /**
+     * static array data paging.
+     * @param data array
+     * @param option option
+     */
+    resource(data: any[], option?: RequestOption) {
+        if (!(data instanceof Array)) {
+            throw Error('data must be an Array.');
+        }
+        this.target = data;
+        this.option = Object.assign({}, defaultRequestOption, option);
+        this.length = this.target.length;
+        this.option.before(null);
+        const filteredResource = this.target.filter(item => this.option.filter(item));
+        const pageEvent = this.pageEvent;
+        const pagedResource = filteredResource.slice(pageEvent.start, pageEvent.end);
+        this.option.success(pagedResource, pageEvent);
+        this[updateActionStatus](pageEvent.page, pageEvent.pages, pageEvent.length);
+        this[updateRangeLabel]();
+        this.option.finish();
+    }
+
+    /**
+     * request paging.
+     * @param target url or static array data
+     * @param option option
+     */
+    of(target: string | any[], option?: RequestOption) {
+        if (typeof target === 'string') {
+            this.ajax(target, option);
+            return;
+        }
+        if (target instanceof Array) {
+            this.resource(target, option);
+            return;
+        }
+        throw Error(target + ' can not be paging.');
+    }
+
+    /**
+     * refresh current page's data.
+     */
+    refresh() {
+        this.of(this.target, this.option);
+    }
+
     [initDomElements]() {
+        this.container.innerHTML = '<div class="rabbit-pager"></div>';
+
         this.actions.selectPageSize.innerHTML = this.config.pageSizeOptions.map(num => `<option value="${num}">${num}</option>`).join('');
         this.labels.itemsPerPageLabel.innerHTML = this.config.itemsPerPageLabel + (this.config.showPageSizeOptions ? '' : this.config.pageSizeOptions[0] || 10);
 
@@ -270,141 +341,9 @@ export class axpager {
             .forEach(e => this.container.firstElementChild.appendChild(e));
     }
 
-    /**
-     * ajax request paging.
-     * @param url url
-     * @param option option
-     */
-    ajax(url: String, option?: RequestOption) {
-        if (!(typeof url === 'string')) {
-            throw Error('Request url is required.');
-        }
-        const that = this;
-        this.target = url as string;
-        this.option = Object.assign({}, defaultRequestOption, option);
-        if (!this.xhr) {
-            this.xhr = new XMLHttpRequest();
-            Object.keys(this.option.headers).forEach(k => {
-                this.xhr.setRequestHeader(k, this.option.headers[k]);
-            });
-            this.xhr.responseType = 'json';
-            this.xhr.addEventListener('load', function () {
-                if (this.status === 200) {
-                    const {data, length} = that.config.getPagedResource(this.response);
-                    that.length = length;
-                    const pageEvent = that.pageEvent;
-                    that.option.success(data, pageEvent);
-                    that[updateActionStatus](pageEvent.page, pageEvent.pages, pageEvent.length);
-                    that[updateRangeLabel]();
-                    return;
-                }
-                that.option.error(new Error(this.status + ': request failed, ' + this.statusText));
-            });
-            if (this.option.timeout && this.option.timeout >= 0) {
-                this.xhr.timeout = this.option.timeout;
-                this.xhr.addEventListener('timeout', function () {
-                    that.option.error(new Error('408: request timeout, request wait time > ' + this.timeout));
-                });
-            }
-            this.xhr.addEventListener('error', function () {
-                that.option.error(new Error('500: request error, ' + this.statusText));
-            });
-            this.xhr.addEventListener('loadend', function () {
-                that.option.finish();
-            });
-        }
-        if (this.xhr.readyState !== 4) {
-            this.xhr.abort();
-        }
-
-        const method = (this.option.method || 'GET').toLowerCase();
-
-        this.option.before(this.xhr);
-
-        if (method === 'get') {
-            const req = Object.assign({}, this.option.data, this.pageParams);
-            const suffix = this.target.includes('?') ? '&' : '?';
-            const searchUrl = this.target + suffix + new URLSearchParams(req as {});
-            this.xhr.open(method, searchUrl, true);
-            this.xhr.send();
-            return;
-        }
-
-        if (method === 'post') {
-            this.xhr.open(method, this.target, true);
-            if (this.option.data instanceof FormData) {
-                const fd = new FormData();
-                this.option.data.forEach((v, k) => fd.set(k, v));
-                const pageParams = this.pageParams;
-                Object.keys(pageParams).forEach(k => fd.set(k, pageParams[k]));
-                this.xhr.send(fd);
-                return;
-            }
-
-            const req = Object.assign({}, this.option.data, this.pageParams);
-            const contentType = this.option.headers['Content-Type'] || ContentType.URL_ENCODED;
-            if (contentType === ContentType.URL_ENCODED) {
-                this.xhr.send(new URLSearchParams(req as {}).toString());
-                return;
-            }
-            if (contentType === ContentType.JSON) {
-                this.xhr.send(JSON.stringify(req));
-                return;
-            }
-            throw Error('Not support Content-Type: ' + contentType);
-        }
-        throw Error('Not support ' + method + ' method.');
-    }
-
-    /**
-     * static array data paging.
-     * @param data array
-     * @param option option
-     */
-    resource(data: any[], option?: RequestOption) {
-        if (!(data instanceof Array)) {
-            throw Error('data must be an Array.');
-        }
-        this.target = data || [];
-        this.option = Object.assign({}, defaultRequestOption, option);
-        this.length = this.target.length;
-        this.option.before(null);
-        const filteredResource = this.target.filter(item => this.option.filter(item));
-        const pageEvent = this.pageEvent;
-        const pagedResource = filteredResource.slice(pageEvent.start, pageEvent.end);
-        this.option.success(pagedResource, pageEvent);
-        this[updateActionStatus](pageEvent.page, pageEvent.pages, pageEvent.length);
-        this[updateRangeLabel]();
-        this.option.finish();
-    }
-
-    /**
-     * request paging.
-     * @param target url or static array data
-     * @param option option
-     */
-    of(target: String | any[], option?: RequestOption) {
-        if (typeof target === 'string') {
-            this.ajax(target, option);
-            return;
-        }
-        if (target instanceof Array) {
-            this.resource(target, option);
-            return;
-        }
-        throw Error(target + ' can not be paging.');
-    }
-
-    /**
-     * refresh current page's data.
-     */
-    refresh() {
-        this.of(this.target, this.option);
-    }
-
     [updateRangeLabel]() {
-        this.labels.rangeLabel.innerHTML = this.config.getRangeLabel(this.currentPage, this.size, this.length);
-    };
+        this.labels.rangeLabel.innerHTML = this.config.getRangeLabel(this.currentPage, this.size, this.pages, this.length);
+    }
 
     [updateActionStatus](page: number, pages: number, length: number) {
         const a = page === 1;
@@ -424,5 +363,5 @@ export class axpager {
         this.actions.btnNext.className = rb;
         this.actions.btnLast.disabled = b;
         this.actions.btnLast.className = rb;
-    };
+    }
 }
