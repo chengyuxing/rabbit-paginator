@@ -49,7 +49,7 @@ export class FetchAdapter implements AjaxAdapter {
                         response.json().then(resolve);
                         return;
                     }
-                    reject(response.status + ': request failed, ' + (response.statusText || 'server error.'));
+                    reject(response.status + ': ' + (response.statusText || 'request failed.'));
                 }).catch(reject);
         });
     }
