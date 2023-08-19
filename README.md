@@ -220,7 +220,7 @@ pager.of(url | data, {
   Paging request success callback, default:
 
   ```typescript
-  (data: any[], pageEvent: PageEvent) => void(0)
+  (data: any[], pageEvent: PageEvent, requestData: {} | FormData | any) => void(0)
   ```
 
 - **error** `optional` `ajax`
@@ -244,7 +244,7 @@ pager.of(url | data, {
   Static array data paging filter, such as `Array#filter` , default:
 
   ```typescript
-  (item: any) => true
+  (item: any, requestData: {} | FormData | any) => true
   ```
 
 ### AjaxAdapter
