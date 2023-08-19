@@ -20,8 +20,8 @@ export interface RequestInitOption {
  * paging request option.
  */
 export interface RequestOption extends RequestInitOption {
-    success: (data: any[], pageEvent: PageEvent) => void,
+    success: (pagedResult: any[], pageEvent: PageEvent, requestData: {} | FormData | any) => void,
     error?: (error: any) => void,
     finish?: () => void,
-    filter?: (item: any) => boolean
+    filter?: (item: any, requestData: {} | FormData | any) => boolean
 }

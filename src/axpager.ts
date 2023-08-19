@@ -32,10 +32,10 @@ const defaultRequestOption: RequestOption = {
     headers: {},
     timeout: -1,
     before: init => void (0),
-    success: (data, pageEvent) => void (0),
+    success: (data, pageEvent, requestData) => void (0),
     error: error => void 0,
     finish: () => void (0),
-    filter: item => true
+    filter: (item, requestData) => true
 }
 
 const icons = {
@@ -260,7 +260,7 @@ export class axpager {
                 const {data, length} = this.config.getPagedResource(response);
                 this.length = length;
                 const pageEvent = this.pageEvent;
-                this.option.success(data, pageEvent);
+                this.option.success(data, pageEvent, this.option.data);
                 this[updateActionStatus](pageEvent.page, pageEvent.pages, pageEvent.length);
                 this[updateRangeLabel]();
             }).catch(this.option.error)
@@ -279,11 +279,11 @@ export class axpager {
         this.target = data;
         this.option = Object.assign({}, defaultRequestOption, option);
         this.option.before(null);
-        const filteredResource = this.target.filter(item => this.option.filter(item));
+        const filteredResource = this.target.filter(item => this.option.filter(item, this.option.data));
         this.length = filteredResource.length;
         const pageEvent = this.pageEvent;
         const pagedResource = filteredResource.slice(pageEvent.start, pageEvent.end);
-        this.option.success(pagedResource, pageEvent);
+        this.option.success(pagedResource, pageEvent, this.option.data);
         this[updateActionStatus](pageEvent.page, pageEvent.pages, pageEvent.length);
         this[updateRangeLabel]();
         this.option.finish();

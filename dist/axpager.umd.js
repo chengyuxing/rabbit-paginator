@@ -117,10 +117,10 @@
         headers: {},
         timeout: -1,
         before: function (init) { return void (0); },
-        success: function (data, pageEvent) { return void (0); },
+        success: function (data, pageEvent, requestData) { return void (0); },
         error: function (error) { return void 0; },
         finish: function () { return void (0); },
-        filter: function (item) { return true; }
+        filter: function (item, requestData) { return true; }
     };
     var icons = {
         fastBackward: '<svg viewBox="0 0 24 24" focusable="false" class="mat-icon"><path d="M18.41 16.59L13.82 12l4.59-4.59L17 6l-6 6 6 6zM6 6h2v12H6z"></path></svg>',
@@ -328,7 +328,7 @@
                 var _a = _this.config.getPagedResource(response), data = _a.data, length = _a.length;
                 _this.length = length;
                 var pageEvent = _this.pageEvent;
-                _this.option.success(data, pageEvent);
+                _this.option.success(data, pageEvent, _this.option.data);
                 _this[updateActionStatus](pageEvent.page, pageEvent.pages, pageEvent.length);
                 _this[updateRangeLabel]();
             }).catch(this.option.error)
@@ -347,11 +347,11 @@
             this.target = data;
             this.option = Object.assign({}, defaultRequestOption, option);
             this.option.before(null);
-            var filteredResource = this.target.filter(function (item) { return _this.option.filter(item); });
+            var filteredResource = this.target.filter(function (item) { return _this.option.filter(item, _this.option.data); });
             this.length = filteredResource.length;
             var pageEvent = this.pageEvent;
             var pagedResource = filteredResource.slice(pageEvent.start, pageEvent.end);
-            this.option.success(pagedResource, pageEvent);
+            this.option.success(pagedResource, pageEvent, this.option.data);
             this[updateActionStatus](pageEvent.page, pageEvent.pages, pageEvent.length);
             this[updateRangeLabel]();
             this.option.finish();

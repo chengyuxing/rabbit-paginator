@@ -51,6 +51,7 @@
 <input type="text" id="term" placeholder="keywords...">
 <ul id="result"></ul>
 <div id="pager" style=""></div>
+<p id="input"></p>
 <p id="output"></p>
 
 <script src="./data.js"></script>
@@ -63,21 +64,23 @@
 
     function doPaging() {
         pager.of(data, {
-            success: (list, event) => {
+            data: {
+                term: document.getElementById('term').value || ''
+            },
+            success: (list, event, req) => {
                 document.getElementById('result').innerHTML = list.map(item => {
-                    const v = document.getElementById('term').value || '';
                     let title = item.title;
-                    if (v) {
-                        title = item.title.replace(v, `<b style="color:red">${v}</b>`);
+                    if (req.term) {
+                        title = item.title.replace(req.term, `<b style="color:red">${req.term}</b>`);
                     }
                     return `<li>${item.id}. ${title}</li>`;
                 }).join('');
+                document.getElementById('input').innerHTML = 'Request data: ' + JSON.stringify(req, null, '');
                 document.getElementById('output').innerHTML = 'Page event: ' + JSON.stringify(event, null, ' ');
             },
-            filter: item => {
-                const v = document.getElementById('term').value || '';
-                if (v) {
-                    return item.title.includes(v);
+            filter: (item, req) => {
+                if (req.term) {
+                    return item.title.includes(req.term);
                 }
                 return true;
             },
