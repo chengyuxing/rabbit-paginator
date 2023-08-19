@@ -23,7 +23,7 @@ export class XMLHttpRequestAdapter implements AjaxAdapter {
                     resolve(this.response);
                     return;
                 }
-                reject(this.status + ': ' + (this.statusText || ', request failed.'));
+                reject(this.status + ': ' + (this.statusText || 'request failed.'));
             };
             if (option.timeout && option.timeout >= 0) {
                 this.xhr.timeout = option.timeout;
@@ -32,7 +32,7 @@ export class XMLHttpRequestAdapter implements AjaxAdapter {
                 };
             }
             this.xhr.onerror = function () {
-                reject(this.status + ": " + (this.statusText || ', server error.'));
+                reject(this.status + ": " + (this.statusText || 'server error.'));
             };
             const method = (option.method || 'GET').toUpperCase();
             if (method === 'GET') {
