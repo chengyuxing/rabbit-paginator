@@ -203,7 +203,12 @@ export class axpager {
      * total pages count.
      */
     get pages(): number {
-        return Math.floor(this.length / this.size) + 1;
+        const num = this.length / this.size;
+        const int = Math.floor(num);
+        if (int === num) {
+            return int;
+        }
+        return int + 1;
     }
 
     /**
