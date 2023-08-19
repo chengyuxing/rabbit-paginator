@@ -320,9 +320,9 @@ class axpager {
         }
         this.target = data;
         this.option = Object.assign({}, defaultRequestOption, option);
-        this.length = this.target.length;
         this.option.before(null);
         const filteredResource = this.target.filter(item => this.option.filter(item));
+        this.length = filteredResource.length;
         const pageEvent = this.pageEvent;
         const pagedResource = filteredResource.slice(pageEvent.start, pageEvent.end);
         this.option.success(pagedResource, pageEvent);

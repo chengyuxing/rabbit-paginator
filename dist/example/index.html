@@ -21,6 +21,10 @@
             background-color: #494949;
         }
 
+        .dark > #term {
+            color: #f5f5f5;
+        }
+
         .light {
             background-color: #ffffff;
             color: initial;
@@ -29,6 +33,14 @@
         .light #pager {
             background-color: #f1f1f1;
         }
+
+        #term {
+            padding: 8px;
+            width: 220px;
+            background-color: transparent;
+            border: 1px solid #939393;
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body class="light">
@@ -36,19 +48,36 @@
     <h1>XPager Basic Example</h1>
     <label for="theme-check" style="margin-left: 20px">Theme: <input id="theme-check" type="checkbox"> dark?</label>
 </div>
+<input type="text" id="term" placeholder="keywords...">
+<ul id="result"></ul>
 <div id="pager" style=""></div>
 <p id="output"></p>
+
+<script src="./data.js"></script>
 <script src="../axpager.umd.min.js"></script>
 <script>
-    const data = new Array(145);
     const {Paginator} = axpager;
     const pager = Paginator.init(document.getElementById('pager'));
 
-    pager.of(data, {
-        success: (list, event) => {
-            document.getElementById('output').innerHTML = 'Page event: ' + JSON.stringify(event, null, ' ');
-        }
-    });
+    doPaging();
+
+    function doPaging() {
+        pager.of(data, {
+            success: (list, event) => {
+                document.getElementById('result').innerHTML = list.map(item => {
+                    return `<li>${item.id}. ${item.title}</li>`
+                }).join('');
+                document.getElementById('output').innerHTML = 'Page event: ' + JSON.stringify(event, null, ' ');
+            },
+            filter: item => {
+                const v = document.getElementById('term').value || '';
+                if (v) {
+                    return item.title.includes(v);
+                }
+                return true;
+            },
+        });
+    }
 
     document.getElementById('theme-check').addEventListener('click', function (e) {
         let c = 'light';
@@ -57,6 +86,10 @@
         }
         document.body.className = c;
         document.getElementById('theme').href = `../themes/axpager.theme.${c}.css`;
+    });
+
+    document.getElementById('term').addEventListener('input', e => {
+        doPaging();
     });
 </script>
 </body>

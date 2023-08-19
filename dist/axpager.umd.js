@@ -346,9 +346,9 @@
             }
             this.target = data;
             this.option = Object.assign({}, defaultRequestOption, option);
-            this.length = this.target.length;
             this.option.before(null);
             var filteredResource = this.target.filter(function (item) { return _this.option.filter(item); });
+            this.length = filteredResource.length;
             var pageEvent = this.pageEvent;
             var pagedResource = filteredResource.slice(pageEvent.start, pageEvent.end);
             this.option.success(pagedResource, pageEvent);
