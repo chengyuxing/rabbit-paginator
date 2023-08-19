@@ -50,7 +50,7 @@ export class FetchAdapter implements AjaxAdapter {
                         return;
                     }
                     reject(response.status + ': request failed, ' + response.statusText);
-                });
+                }).catch(reject);
         });
     }
 }
