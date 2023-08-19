@@ -23,7 +23,7 @@ export class XMLHttpRequestAdapter implements AjaxAdapter {
                     resolve(this.response);
                     return;
                 }
-                reject(this.status + ': request failed, ' + this.statusText);
+                reject(this.status + ': request failed, ' + (this.statusText || 'server error.'));
             };
             if (option.timeout && option.timeout >= 0) {
                 this.xhr.timeout = option.timeout;
