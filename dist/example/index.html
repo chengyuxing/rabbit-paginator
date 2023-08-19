@@ -65,7 +65,12 @@
         pager.of(data, {
             success: (list, event) => {
                 document.getElementById('result').innerHTML = list.map(item => {
-                    return `<li>${item.id}. ${item.title}</li>`
+                    const v = document.getElementById('term').value || '';
+                    let title = item.title;
+                    if (v) {
+                        title = item.title.replace(v, `<b style="color:red">${v}</b>`);
+                    }
+                    return `<li>${item.id}. ${title}</li>`;
                 }).join('');
                 document.getElementById('output').innerHTML = 'Page event: ' + JSON.stringify(event, null, ' ');
             },
