@@ -129,11 +129,11 @@ pager.of(url | data, {
 
 - **nextPageLabel** `optional`
 
-  Next page button label text, default `上一页` .
+  Next page button label text, default `下一页` .
 
 - **lastPageLabel** `optional`
 
-  Last page button label text, default `上一页` .
+  Last page button label text, default `最后一页` .
 
 - **ajaxAdapter** `optional`
 
