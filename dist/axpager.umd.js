@@ -6,8 +6,88 @@
 
     var ContentType = {
         JSON: 'application/json',
-        URL_ENCODED: 'application/x-www-form-urlencoded'
+        URL_ENCODED: 'application/x-www-form-urlencoded',
+        FORM_DATA: 'multipart/form-data'
     };
+
+    /**
+     * Base on XMLHttpRequest default implementation.
+     */
+    var XMLHttpRequestAdapter = /** @class */ (function () {
+        function XMLHttpRequestAdapter() {
+        }
+        XMLHttpRequestAdapter.prototype.request = function (url, pageParams, option) {
+            var _this = this;
+            return new Promise(function (resolve, reject) {
+                if (_this.xhr && _this.xhr.readyState !== 4) {
+                    _this.xhr.abort();
+                }
+                _this.xhr = new XMLHttpRequest();
+                _this.xhr.responseType = 'json';
+                Object.keys(option.headers).forEach(function (k) {
+                    _this.xhr.setRequestHeader(k, option.headers[k]);
+                });
+                option.before(_this.xhr);
+                _this.xhr.onload = function () {
+                    if (this.readyState === 4 && this.status >= 200 && this.status < 300) {
+                        resolve(this.response);
+                        return;
+                    }
+                    reject(this.status + ': ' + (this.statusText || 'request failed.'));
+                };
+                if (option.timeout && option.timeout >= 0) {
+                    _this.xhr.timeout = option.timeout;
+                    _this.xhr.ontimeout = function () {
+                        reject('408: request timeout, request wait time > ' + this.timeout);
+                    };
+                }
+                _this.xhr.onerror = function () {
+                    reject(this.status + ": " + (this.statusText || 'server error.'));
+                };
+                var method = (option.method || 'GET').toUpperCase();
+                if (method === 'GET') {
+                    var req = Object.assign({}, option.data, pageParams);
+                    var suffix = url.includes('?') ? '&' : '?';
+                    var searchUrl = url + suffix + new URLSearchParams(req);
+                    _this.xhr.open(method, searchUrl, true);
+                    _this.xhr.send();
+                    return;
+                }
+                if (method === 'POST') {
+                    _this.xhr.open(method, url, true);
+                    if (option.data instanceof FormData) {
+                        var fd_1 = new FormData();
+                        option.data.forEach(function (v, k) { return fd_1.set(k, v); });
+                        Object.keys(pageParams).forEach(function (k) { return fd_1.set(k, pageParams[k]); });
+                        _this.xhr.send(fd_1);
+                        return;
+                    }
+                    var contentType = option.headers['Content-Type'] || ContentType.URL_ENCODED;
+                    if (contentType === ContentType.FORM_DATA) {
+                        var fd_2 = new FormData();
+                        Object.keys(option.data).forEach(function (k) { return fd_2.set(k, option.data[k]); });
+                        Object.keys(pageParams).forEach(function (k) { return fd_2.set(k, pageParams[k]); });
+                        _this.xhr.send(fd_2);
+                        return;
+                    }
+                    var req = Object.assign({}, option.data, pageParams);
+                    if (contentType === ContentType.URL_ENCODED) {
+                        _this.xhr.send(new URLSearchParams(req));
+                        return;
+                    }
+                    if (contentType === ContentType.JSON) {
+                        _this.xhr.send(JSON.stringify(req));
+                        return;
+                    }
+                    _this.xhr.abort();
+                    reject('Not support Content-Type: ' + contentType);
+                }
+                reject('Not support ' + method + ' method.');
+            });
+        };
+        return XMLHttpRequestAdapter;
+    }());
+
     // noinspection JSUnresolvedReference
     /**
      * default page init config.
@@ -22,7 +102,9 @@
         showFirstLastButtons: true,
         showPageSizeOptions: true,
         pageSizeOptions: [10, 15, 30],
-        getRangeLabel: function (page, size, length) { return "\u7B2C".concat(page, "/").concat(Math.floor(length / size + 1), "\u9875\uFF0C\u5171").concat(length, "\u6761"); },
+        ajaxAdapter: new XMLHttpRequestAdapter(),
+        getRangeLabel: function (page, size, pages, length) { return "\u7B2C".concat(page, "/").concat(pages, "\u9875\uFF0C\u5171").concat(length, "\u6761"); },
+        getPageParams: function (page, size) { return ({ page: page, size: size }); },
         getPagedResource: function (response) { return ({ data: response.data, length: response.pager.recordCount }); },
         changes: function (pageEvent, eventTarget) { return void (0); },
     };
@@ -34,7 +116,7 @@
         data: {},
         headers: {},
         timeout: -1,
-        before: function (xhr) { return void (0); },
+        before: function (init) { return void (0); },
         success: function (data, pageEvent) { return void (0); },
         error: function (error) { return void 0; },
         finish: function () { return void (0); },
@@ -59,7 +141,6 @@
     var updateRangeLabel = Symbol('updateRangeLabel');
     /**
      * paginator support ajax request and static array data paging.
-     * @author chengyuxingo@gmail.com
      */
     var axpager = /** @class */ (function () {
         /**
@@ -75,7 +156,6 @@
             this.length = 0;
             this.size = 0;
             this.container = container;
-            this.container.innerHTML = '<div class="rabbit-pager"></div>';
             this.config = Object.assign({}, defaultPageConfig, config);
             this.size = this.config.pageSizeOptions[0] || 10;
             this.actions = {
@@ -176,7 +256,12 @@
              * total pages count.
              */
             get: function () {
-                return Math.floor(this.length / this.size) + 1;
+                var num = this.length / this.size;
+                var int = Math.floor(num);
+                if (int === num) {
+                    return int;
+                }
+                return int + 1;
             },
             enumerable: false,
             configurable: true
@@ -186,10 +271,7 @@
              * ajax paging request page params.
              */
             get: function () {
-                return {
-                    page: this.currentPage,
-                    size: this.size
-                };
+                return this.config.getPageParams(this.currentPage, this.size);
             },
             enumerable: false,
             configurable: true
@@ -222,29 +304,6 @@
         axpager.init = function (container, config) {
             return new axpager(container, config);
         };
-        axpager.prototype[initDomElements] = function () {
-            var _this = this;
-            this.actions.selectPageSize.innerHTML = this.config.pageSizeOptions.map(function (num) { return "<option value=\"".concat(num, "\">").concat(num, "</option>"); }).join('');
-            this.labels.itemsPerPageLabel.innerHTML = this.config.itemsPerPageLabel + (this.config.showPageSizeOptions ? '' : this.config.pageSizeOptions[0] || 10);
-            // page size panel
-            [this.labels.itemsPerPageLabel,
-                (this.config.showPageSizeOptions ? this.actions.selectPageSize : null)
-            ].filter(function (e) { return e !== null; })
-                .forEach(function (e) { return _this.panels.pageSizePanel.appendChild(e); });
-            // range actions panel
-            [this.labels.rangeLabel,
-                (this.config.showFirstLastButtons ? this.actions.btnFirst : null),
-                this.actions.btnPrev,
-                this.actions.btnNext,
-                (this.config.showFirstLastButtons ? this.actions.btnLast : null)
-            ].filter(function (e) { return e !== null; })
-                .forEach(function (e) { return _this.panels.actionsPanel.appendChild(e); });
-            // container
-            [(this.config.hidePageSize ? null : this.panels.pageSizePanel),
-                this.panels.actionsPanel
-            ].filter(function (e) { return e !== null; })
-                .forEach(function (e) { return _this.container.firstElementChild.appendChild(e); });
-        };
         /**
          * ajax request paging.
          * @param url url
@@ -255,76 +314,25 @@
             if (!(typeof url === 'string')) {
                 throw Error('Request url is required.');
             }
-            var that = this;
             this.target = url;
             this.option = Object.assign({}, defaultRequestOption, option);
-            if (!this.xhr) {
-                this.xhr = new XMLHttpRequest();
-                Object.keys(this.option.headers).forEach(function (k) {
-                    _this.xhr.setRequestHeader(k, _this.option.headers[k]);
-                });
-                this.xhr.responseType = 'json';
-                this.xhr.addEventListener('load', function () {
-                    if (this.status === 200) {
-                        var _a = that.config.getPagedResource(this.response), data = _a.data, length_1 = _a.length;
-                        that.length = length_1;
-                        var pageEvent = that.pageEvent;
-                        that.option.success(data, pageEvent);
-                        that[updateActionStatus](pageEvent.page, pageEvent.pages, pageEvent.length);
-                        that[updateRangeLabel]();
-                        return;
-                    }
-                    that.option.error(new Error(this.status + ': request failed, ' + this.statusText));
-                });
-                if (this.option.timeout && this.option.timeout >= 0) {
-                    this.xhr.timeout = this.option.timeout;
-                    this.xhr.addEventListener('timeout', function () {
-                        that.option.error(new Error('408: request timeout, request wait time > ' + this.timeout));
-                    });
-                }
-                this.xhr.addEventListener('error', function () {
-                    that.option.error(new Error('500: request error, ' + this.statusText));
-                });
-                this.xhr.addEventListener('loadend', function () {
-                    that.option.finish();
-                });
-            }
-            if (this.xhr.readyState !== 4) {
-                this.xhr.abort();
-            }
-            var method = (this.option.method || 'GET').toLowerCase();
-            this.option.before(this.xhr);
-            if (method === 'get') {
-                var req = Object.assign({}, this.option.data, this.pageParams);
-                var suffix = this.target.includes('?') ? '&' : '?';
-                var searchUrl = this.target + suffix + new URLSearchParams(req);
-                this.xhr.open(method, searchUrl, true);
-                this.xhr.send();
-                return;
-            }
-            if (method === 'post') {
-                this.xhr.open(method, this.target, true);
-                if (this.option.data instanceof FormData) {
-                    var fd_1 = new FormData();
-                    this.option.data.forEach(function (v, k) { return fd_1.set(k, v); });
-                    var pageParams_1 = this.pageParams;
-                    Object.keys(pageParams_1).forEach(function (k) { return fd_1.set(k, pageParams_1[k]); });
-                    this.xhr.send(fd_1);
-                    return;
-                }
-                var req = Object.assign({}, this.option.data, this.pageParams);
-                var contentType = this.option.headers['Content-Type'] || ContentType.URL_ENCODED;
-                if (contentType === ContentType.URL_ENCODED) {
-                    this.xhr.send(new URLSearchParams(req).toString());
-                    return;
-                }
-                if (contentType === ContentType.JSON) {
-                    this.xhr.send(JSON.stringify(req));
-                    return;
-                }
-                throw Error('Not support Content-Type: ' + contentType);
-            }
-            throw Error('Not support ' + method + ' method.');
+            var initOption = {
+                method: this.option.method,
+                data: this.option.data,
+                headers: this.option.headers,
+                timeout: this.option.timeout,
+                before: this.option.before
+            };
+            this.config.ajaxAdapter.request(this.target, this.pageParams, initOption)
+                .then(function (response) {
+                var _a = _this.config.getPagedResource(response), data = _a.data, length = _a.length;
+                _this.length = length;
+                var pageEvent = _this.pageEvent;
+                _this.option.success(data, pageEvent);
+                _this[updateActionStatus](pageEvent.page, pageEvent.pages, pageEvent.length);
+                _this[updateRangeLabel]();
+            }).catch(this.option.error)
+                .finally(this.option.finish);
         };
         /**
          * static array data paging.
@@ -336,7 +344,7 @@
             if (!(data instanceof Array)) {
                 throw Error('data must be an Array.');
             }
-            this.target = data || [];
+            this.target = data;
             this.option = Object.assign({}, defaultRequestOption, option);
             this.length = this.target.length;
             this.option.before(null);
@@ -370,8 +378,32 @@
         axpager.prototype.refresh = function () {
             this.of(this.target, this.option);
         };
+        axpager.prototype[initDomElements] = function () {
+            var _this = this;
+            this.container.innerHTML = '<div class="rabbit-pager"></div>';
+            this.actions.selectPageSize.innerHTML = this.config.pageSizeOptions.map(function (num) { return "<option value=\"".concat(num, "\">").concat(num, "</option>"); }).join('');
+            this.labels.itemsPerPageLabel.innerHTML = this.config.itemsPerPageLabel + (this.config.showPageSizeOptions ? '' : this.config.pageSizeOptions[0] || 10);
+            // page size panel
+            [this.labels.itemsPerPageLabel,
+                (this.config.showPageSizeOptions ? this.actions.selectPageSize : null)
+            ].filter(function (e) { return e !== null; })
+                .forEach(function (e) { return _this.panels.pageSizePanel.appendChild(e); });
+            // range actions panel
+            [this.labels.rangeLabel,
+                (this.config.showFirstLastButtons ? this.actions.btnFirst : null),
+                this.actions.btnPrev,
+                this.actions.btnNext,
+                (this.config.showFirstLastButtons ? this.actions.btnLast : null)
+            ].filter(function (e) { return e !== null; })
+                .forEach(function (e) { return _this.panels.actionsPanel.appendChild(e); });
+            // container
+            [(this.config.hidePageSize ? null : this.panels.pageSizePanel),
+                this.panels.actionsPanel
+            ].filter(function (e) { return e !== null; })
+                .forEach(function (e) { return _this.container.firstElementChild.appendChild(e); });
+        };
         axpager.prototype[updateRangeLabel] = function () {
-            this.labels.rangeLabel.innerHTML = this.config.getRangeLabel(this.currentPage, this.size, this.length);
+            this.labels.rangeLabel.innerHTML = this.config.getRangeLabel(this.currentPage, this.size, this.pages, this.length);
         };
         axpager.prototype[updateActionStatus] = function (page, pages, length) {
             var a = page === 1;
@@ -392,11 +424,73 @@
     }());
 
     /**
+     * Based on fetch api adapter.
+     */
+    var FetchAdapter = /** @class */ (function () {
+        function FetchAdapter() {
+        }
+        FetchAdapter.prototype.request = function (url, pageParams, option) {
+            return new Promise(function (resolve, reject) {
+                var method = (option.method || 'GET').toUpperCase();
+                var searchUrl = url;
+                var initOption = {
+                    method: option.method,
+                    headers: option.headers,
+                };
+                if (method === 'GET') {
+                    var req = Object.assign({}, option.data, pageParams);
+                    var suffix = url.includes('?') ? '&' : '?';
+                    searchUrl = searchUrl + suffix + new URLSearchParams(req);
+                }
+                else if (method === 'POST') {
+                    if (option.data instanceof FormData) {
+                        var fd_1 = new FormData();
+                        option.data.forEach(function (v, k) { return fd_1.set(k, v); });
+                        Object.keys(pageParams).forEach(function (k) { return fd_1.set(k, pageParams[k]); });
+                        initOption.body = fd_1;
+                    }
+                    else {
+                        var contentType = option.headers['Content-Type'] || ContentType.URL_ENCODED;
+                        if (contentType === ContentType.FORM_DATA) {
+                            var fd_2 = new FormData();
+                            Object.keys(option.data).forEach(function (k) { return fd_2.set(k, option.data[k]); });
+                            Object.keys(pageParams).forEach(function (k) { return fd_2.set(k, pageParams[k]); });
+                            initOption.body = fd_2;
+                        }
+                        else {
+                            var req = Object.assign({}, option.data, pageParams);
+                            if (contentType === ContentType.URL_ENCODED) {
+                                initOption.body = new URLSearchParams(req);
+                            }
+                            else if (contentType === ContentType.JSON) {
+                                initOption.body = JSON.stringify(req);
+                            }
+                        }
+                    }
+                }
+                option.before(initOption);
+                fetch(searchUrl, initOption)
+                    .then(function (response) {
+                    if (response.ok) {
+                        response.json().then(resolve);
+                        return;
+                    }
+                    reject(response.status + ': ' + (response.statusText || 'request failed.'));
+                }).catch(reject);
+            });
+        };
+        return FetchAdapter;
+    }());
+
+    /**
      * init a new paginator instance.
      */
     var init = axpager.init;
 
+    exports.ContentType = ContentType;
+    exports.FetchAdapter = FetchAdapter;
     exports.Paginator = axpager;
+    exports.XMLHttpRequestAdapter = XMLHttpRequestAdapter;
     exports.createElement = createElement;
     exports.init = init;
 

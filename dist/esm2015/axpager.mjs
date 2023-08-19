@@ -1,7 +1,83 @@
 const ContentType = {
     JSON: 'application/json',
-    URL_ENCODED: 'application/x-www-form-urlencoded'
+    URL_ENCODED: 'application/x-www-form-urlencoded',
+    FORM_DATA: 'multipart/form-data'
 };
+
+/**
+ * Base on XMLHttpRequest default implementation.
+ */
+class XMLHttpRequestAdapter {
+    request(url, pageParams, option) {
+        return new Promise((resolve, reject) => {
+            if (this.xhr && this.xhr.readyState !== 4) {
+                this.xhr.abort();
+            }
+            this.xhr = new XMLHttpRequest();
+            this.xhr.responseType = 'json';
+            Object.keys(option.headers).forEach(k => {
+                this.xhr.setRequestHeader(k, option.headers[k]);
+            });
+            option.before(this.xhr);
+            this.xhr.onload = function () {
+                if (this.readyState === 4 && this.status >= 200 && this.status < 300) {
+                    resolve(this.response);
+                    return;
+                }
+                reject(this.status + ': ' + (this.statusText || 'request failed.'));
+            };
+            if (option.timeout && option.timeout >= 0) {
+                this.xhr.timeout = option.timeout;
+                this.xhr.ontimeout = function () {
+                    reject('408: request timeout, request wait time > ' + this.timeout);
+                };
+            }
+            this.xhr.onerror = function () {
+                reject(this.status + ": " + (this.statusText || 'server error.'));
+            };
+            const method = (option.method || 'GET').toUpperCase();
+            if (method === 'GET') {
+                const req = Object.assign({}, option.data, pageParams);
+                const suffix = url.includes('?') ? '&' : '?';
+                const searchUrl = url + suffix + new URLSearchParams(req);
+                this.xhr.open(method, searchUrl, true);
+                this.xhr.send();
+                return;
+            }
+            if (method === 'POST') {
+                this.xhr.open(method, url, true);
+                if (option.data instanceof FormData) {
+                    const fd = new FormData();
+                    option.data.forEach((v, k) => fd.set(k, v));
+                    Object.keys(pageParams).forEach(k => fd.set(k, pageParams[k]));
+                    this.xhr.send(fd);
+                    return;
+                }
+                const contentType = option.headers['Content-Type'] || ContentType.URL_ENCODED;
+                if (contentType === ContentType.FORM_DATA) {
+                    const fd = new FormData();
+                    Object.keys(option.data).forEach(k => fd.set(k, option.data[k]));
+                    Object.keys(pageParams).forEach(k => fd.set(k, pageParams[k]));
+                    this.xhr.send(fd);
+                    return;
+                }
+                const req = Object.assign({}, option.data, pageParams);
+                if (contentType === ContentType.URL_ENCODED) {
+                    this.xhr.send(new URLSearchParams(req));
+                    return;
+                }
+                if (contentType === ContentType.JSON) {
+                    this.xhr.send(JSON.stringify(req));
+                    return;
+                }
+                this.xhr.abort();
+                reject('Not support Content-Type: ' + contentType);
+            }
+            reject('Not support ' + method + ' method.');
+        });
+    }
+}
+
 // noinspection JSUnresolvedReference
 /**
  * default page init config.
@@ -16,7 +92,9 @@ const defaultPageConfig = {
     showFirstLastButtons: true,
     showPageSizeOptions: true,
     pageSizeOptions: [10, 15, 30],
-    getRangeLabel: (page, size, length) => `第${page}/${Math.floor(length / size + 1)}页，共${length}条`,
+    ajaxAdapter: new XMLHttpRequestAdapter(),
+    getRangeLabel: (page, size, pages, length) => `第${page}/${pages}页，共${length}条`,
+    getPageParams: (page, size) => ({ page: page, size: size }),
     getPagedResource: response => ({ data: response.data, length: response.pager.recordCount }),
     changes: (pageEvent, eventTarget) => void (0),
 };
@@ -28,7 +106,7 @@ const defaultRequestOption = {
     data: {},
     headers: {},
     timeout: -1,
-    before: xhr => void (0),
+    before: init => void (0),
     success: (data, pageEvent) => void (0),
     error: error => void 0,
     finish: () => void (0),
@@ -52,7 +130,6 @@ const updateActionStatus = Symbol('updateActionStatus');
 const updateRangeLabel = Symbol('updateRangeLabel');
 /**
  * paginator support ajax request and static array data paging.
- * @author chengyuxingo@gmail.com
  */
 class axpager {
     /**
@@ -67,7 +144,6 @@ class axpager {
         this.length = 0;
         this.size = 0;
         this.container = container;
-        this.container.innerHTML = '<div class="rabbit-pager"></div>';
         this.config = Object.assign({}, defaultPageConfig, config);
         this.size = this.config.pageSizeOptions[0] || 10;
         this.actions = {
@@ -167,16 +243,18 @@ class axpager {
      * total pages count.
      */
     get pages() {
-        return Math.floor(this.length / this.size) + 1;
+        const num = this.length / this.size;
+        const int = Math.floor(num);
+        if (int === num) {
+            return int;
+        }
+        return int + 1;
     }
     /**
      * ajax paging request page params.
      */
     get pageParams() {
-        return {
-            page: this.currentPage,
-            size: this.size
-        };
+        return this.config.getPageParams(this.currentPage, this.size);
     }
     /**
      * page event.
@@ -202,28 +280,6 @@ class axpager {
     static init(container, config) {
         return new axpager(container, config);
     }
-    [initDomElements]() {
-        this.actions.selectPageSize.innerHTML = this.config.pageSizeOptions.map(num => `<option value="${num}">${num}</option>`).join('');
-        this.labels.itemsPerPageLabel.innerHTML = this.config.itemsPerPageLabel + (this.config.showPageSizeOptions ? '' : this.config.pageSizeOptions[0] || 10);
-        // page size panel
-        [this.labels.itemsPerPageLabel,
-            (this.config.showPageSizeOptions ? this.actions.selectPageSize : null)
-        ].filter(e => e !== null)
-            .forEach(e => this.panels.pageSizePanel.appendChild(e));
-        // range actions panel
-        [this.labels.rangeLabel,
-            (this.config.showFirstLastButtons ? this.actions.btnFirst : null),
-            this.actions.btnPrev,
-            this.actions.btnNext,
-            (this.config.showFirstLastButtons ? this.actions.btnLast : null)
-        ].filter(e => e !== null)
-            .forEach(e => this.panels.actionsPanel.appendChild(e));
-        // container
-        [(this.config.hidePageSize ? null : this.panels.pageSizePanel),
-            this.panels.actionsPanel
-        ].filter(e => e !== null)
-            .forEach(e => this.container.firstElementChild.appendChild(e));
-    }
     /**
      * ajax request paging.
      * @param url url
@@ -233,76 +289,25 @@ class axpager {
         if (!(typeof url === 'string')) {
             throw Error('Request url is required.');
         }
-        const that = this;
         this.target = url;
         this.option = Object.assign({}, defaultRequestOption, option);
-        if (!this.xhr) {
-            this.xhr = new XMLHttpRequest();
-            Object.keys(this.option.headers).forEach(k => {
-                this.xhr.setRequestHeader(k, this.option.headers[k]);
-            });
-            this.xhr.responseType = 'json';
-            this.xhr.addEventListener('load', function () {
-                if (this.status === 200) {
-                    const { data, length } = that.config.getPagedResource(this.response);
-                    that.length = length;
-                    const pageEvent = that.pageEvent;
-                    that.option.success(data, pageEvent);
-                    that[updateActionStatus](pageEvent.page, pageEvent.pages, pageEvent.length);
-                    that[updateRangeLabel]();
-                    return;
-                }
-                that.option.error(new Error(this.status + ': request failed, ' + this.statusText));
-            });
-            if (this.option.timeout && this.option.timeout >= 0) {
-                this.xhr.timeout = this.option.timeout;
-                this.xhr.addEventListener('timeout', function () {
-                    that.option.error(new Error('408: request timeout, request wait time > ' + this.timeout));
-                });
-            }
-            this.xhr.addEventListener('error', function () {
-                that.option.error(new Error('500: request error, ' + this.statusText));
-            });
-            this.xhr.addEventListener('loadend', function () {
-                that.option.finish();
-            });
-        }
-        if (this.xhr.readyState !== 4) {
-            this.xhr.abort();
-        }
-        const method = (this.option.method || 'GET').toLowerCase();
-        this.option.before(this.xhr);
-        if (method === 'get') {
-            const req = Object.assign({}, this.option.data, this.pageParams);
-            const suffix = this.target.includes('?') ? '&' : '?';
-            const searchUrl = this.target + suffix + new URLSearchParams(req);
-            this.xhr.open(method, searchUrl, true);
-            this.xhr.send();
-            return;
-        }
-        if (method === 'post') {
-            this.xhr.open(method, this.target, true);
-            if (this.option.data instanceof FormData) {
-                const fd = new FormData();
-                this.option.data.forEach((v, k) => fd.set(k, v));
-                const pageParams = this.pageParams;
-                Object.keys(pageParams).forEach(k => fd.set(k, pageParams[k]));
-                this.xhr.send(fd);
-                return;
-            }
-            const req = Object.assign({}, this.option.data, this.pageParams);
-            const contentType = this.option.headers['Content-Type'] || ContentType.URL_ENCODED;
-            if (contentType === ContentType.URL_ENCODED) {
-                this.xhr.send(new URLSearchParams(req).toString());
-                return;
-            }
-            if (contentType === ContentType.JSON) {
-                this.xhr.send(JSON.stringify(req));
-                return;
-            }
-            throw Error('Not support Content-Type: ' + contentType);
-        }
-        throw Error('Not support ' + method + ' method.');
+        const initOption = {
+            method: this.option.method,
+            data: this.option.data,
+            headers: this.option.headers,
+            timeout: this.option.timeout,
+            before: this.option.before
+        };
+        this.config.ajaxAdapter.request(this.target, this.pageParams, initOption)
+            .then(response => {
+            const { data, length } = this.config.getPagedResource(response);
+            this.length = length;
+            const pageEvent = this.pageEvent;
+            this.option.success(data, pageEvent);
+            this[updateActionStatus](pageEvent.page, pageEvent.pages, pageEvent.length);
+            this[updateRangeLabel]();
+        }).catch(this.option.error)
+            .finally(this.option.finish);
     }
     /**
      * static array data paging.
@@ -313,7 +318,7 @@ class axpager {
         if (!(data instanceof Array)) {
             throw Error('data must be an Array.');
         }
-        this.target = data || [];
+        this.target = data;
         this.option = Object.assign({}, defaultRequestOption, option);
         this.length = this.target.length;
         this.option.before(null);
@@ -347,10 +352,32 @@ class axpager {
     refresh() {
         this.of(this.target, this.option);
     }
-    [updateRangeLabel]() {
-        this.labels.rangeLabel.innerHTML = this.config.getRangeLabel(this.currentPage, this.size, this.length);
+    [initDomElements]() {
+        this.container.innerHTML = '<div class="rabbit-pager"></div>';
+        this.actions.selectPageSize.innerHTML = this.config.pageSizeOptions.map(num => `<option value="${num}">${num}</option>`).join('');
+        this.labels.itemsPerPageLabel.innerHTML = this.config.itemsPerPageLabel + (this.config.showPageSizeOptions ? '' : this.config.pageSizeOptions[0] || 10);
+        // page size panel
+        [this.labels.itemsPerPageLabel,
+            (this.config.showPageSizeOptions ? this.actions.selectPageSize : null)
+        ].filter(e => e !== null)
+            .forEach(e => this.panels.pageSizePanel.appendChild(e));
+        // range actions panel
+        [this.labels.rangeLabel,
+            (this.config.showFirstLastButtons ? this.actions.btnFirst : null),
+            this.actions.btnPrev,
+            this.actions.btnNext,
+            (this.config.showFirstLastButtons ? this.actions.btnLast : null)
+        ].filter(e => e !== null)
+            .forEach(e => this.panels.actionsPanel.appendChild(e));
+        // container
+        [(this.config.hidePageSize ? null : this.panels.pageSizePanel),
+            this.panels.actionsPanel
+        ].filter(e => e !== null)
+            .forEach(e => this.container.firstElementChild.appendChild(e));
     }
-    ;
+    [updateRangeLabel]() {
+        this.labels.rangeLabel.innerHTML = this.config.getRangeLabel(this.currentPage, this.size, this.pages, this.length);
+    }
     [updateActionStatus](page, pages, length) {
         const a = page === 1;
         const b = pages === 1 || page === pages;
@@ -366,7 +393,62 @@ class axpager {
         this.actions.btnLast.disabled = b;
         this.actions.btnLast.className = rb;
     }
-    ;
+}
+
+/**
+ * Based on fetch api adapter.
+ */
+class FetchAdapter {
+    request(url, pageParams, option) {
+        return new Promise((resolve, reject) => {
+            const method = (option.method || 'GET').toUpperCase();
+            let searchUrl = url;
+            const initOption = {
+                method: option.method,
+                headers: option.headers,
+            };
+            if (method === 'GET') {
+                const req = Object.assign({}, option.data, pageParams);
+                const suffix = url.includes('?') ? '&' : '?';
+                searchUrl = searchUrl + suffix + new URLSearchParams(req);
+            }
+            else if (method === 'POST') {
+                if (option.data instanceof FormData) {
+                    const fd = new FormData();
+                    option.data.forEach((v, k) => fd.set(k, v));
+                    Object.keys(pageParams).forEach(k => fd.set(k, pageParams[k]));
+                    initOption.body = fd;
+                }
+                else {
+                    const contentType = option.headers['Content-Type'] || ContentType.URL_ENCODED;
+                    if (contentType === ContentType.FORM_DATA) {
+                        const fd = new FormData();
+                        Object.keys(option.data).forEach(k => fd.set(k, option.data[k]));
+                        Object.keys(pageParams).forEach(k => fd.set(k, pageParams[k]));
+                        initOption.body = fd;
+                    }
+                    else {
+                        const req = Object.assign({}, option.data, pageParams);
+                        if (contentType === ContentType.URL_ENCODED) {
+                            initOption.body = new URLSearchParams(req);
+                        }
+                        else if (contentType === ContentType.JSON) {
+                            initOption.body = JSON.stringify(req);
+                        }
+                    }
+                }
+            }
+            option.before(initOption);
+            fetch(searchUrl, initOption)
+                .then(response => {
+                if (response.ok) {
+                    response.json().then(resolve);
+                    return;
+                }
+                reject(response.status + ': ' + (response.statusText || 'request failed.'));
+            }).catch(reject);
+        });
+    }
 }
 
 /**
@@ -374,5 +456,5 @@ class axpager {
  */
 const init = axpager.init;
 
-export { axpager as Paginator, createElement, init };
+export { ContentType, FetchAdapter, axpager as Paginator, XMLHttpRequestAdapter, createElement, init };
 //# sourceMappingURL=axpager.mjs.map

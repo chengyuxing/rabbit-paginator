@@ -244,7 +244,7 @@ pager.of(url | data, {
   Static array data paging filter, such as `Array#filter` , default:
 
   ```typescript
-  (item: any) => boolean
+  (item: any) => true
   ```
 
 ### AjaxAdapter

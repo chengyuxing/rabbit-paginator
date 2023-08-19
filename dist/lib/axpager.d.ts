@@ -9,7 +9,6 @@ declare const updateActionStatus: unique symbol;
 declare const updateRangeLabel: unique symbol;
 /**
  * paginator support ajax request and static array data paging.
- * @author chengyuxingo@gmail.com
  */
 export declare class axpager {
     private container;
@@ -23,7 +22,6 @@ export declare class axpager {
     private length;
     private size;
     private option;
-    private xhr;
     /**
      * paginator.
      * @param container container element
@@ -37,10 +35,7 @@ export declare class axpager {
     /**
      * ajax paging request page params.
      */
-    get pageParams(): {
-        page: number;
-        size: number;
-    };
+    get pageParams(): {};
     /**
      * page event.
      */
@@ -52,13 +47,12 @@ export declare class axpager {
      * @return xpager paginator
      */
     static init(container: HTMLElement, config?: PageConfig): axpager;
-    [initDomElements](): void;
     /**
      * ajax request paging.
      * @param url url
      * @param option option
      */
-    ajax(url: String, option?: RequestOption): void;
+    ajax(url: string, option?: RequestOption): void;
     /**
      * static array data paging.
      * @param data array
@@ -70,11 +64,12 @@ export declare class axpager {
      * @param target url or static array data
      * @param option option
      */
-    of(target: String | any[], option?: RequestOption): void;
+    of(target: string | any[], option?: RequestOption): void;
     /**
      * refresh current page's data.
      */
     refresh(): void;
+    [initDomElements](): void;
     [updateRangeLabel](): void;
     [updateActionStatus](page: number, pages: number, length: number): void;
 }
