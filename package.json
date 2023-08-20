@@ -12,6 +12,7 @@
   "files": [
     "dist",
     "README.md",
+    "CHANGE_NOTE.md",
     "LICENSE"
   ],
   "private": false,
