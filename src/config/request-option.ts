@@ -13,15 +13,15 @@ export interface RequestInitOption {
     data?: {} | FormData;
     headers?: {};
     timeout?: number;
-    before?: (init: XMLHttpRequest | RequestInit | any) => void
+    before?: (init: XMLHttpRequest | RequestInit | any) => void;
 }
 
 /**
  * paging request option.
  */
 export interface RequestOption extends RequestInitOption {
-    success: (pagedResult: any[], pageEvent: PageEvent, requestData: {} | FormData | any) => void,
-    error?: (error: any) => void,
-    finish?: () => void,
-    filter?: (item: any, requestData: {} | FormData | any) => boolean
+    success: (pagedResult: any[], pageEvent: PageEvent, requestData: {} | FormData | any) => void;
+    error?: (error: any) => void;
+    finish?: () => void;
+    filter?: (item: any, requestData: {} | FormData | any) => boolean;
 }

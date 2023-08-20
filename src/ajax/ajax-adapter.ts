@@ -7,7 +7,7 @@ export const ContentType = {
 };
 
 /**
- * ajax paging adapter.
+ * ajax request adapter.
  */
 export interface AjaxAdapter {
 
