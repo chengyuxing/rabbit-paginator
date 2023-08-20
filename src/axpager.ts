@@ -18,7 +18,7 @@ const defaultPageConfig: PageConfig = {
     showPageSizeOptions: true,
     pageSizeOptions: [10, 15, 30],
     ajaxAdapter: new XMLHttpRequestAdapter(),
-    getRangeLabel: (page: number, size: number, pages: number, length: number) => `第${page}/${pages}页，共${length}条`,
+    getRangeLabel: (page, size, pages, length) => `第${page}/${pages}页，共${length}条`,
     getPageParams: (page, size) => ({page: page, size: size}),
     getPagedResource: response => ({data: response.data, length: response.pager.recordCount}),
     changes: (pageEvent, eventTarget) => void (0),

@@ -91,7 +91,7 @@ pager.of(url | data, {
 
 - **of**(target: string | any[], option?: [RequestOption](#RequestOption))
 
-  request paging, **ajax** or **resource** will be called depends on target type.
+  Request paging, **ajax** or **resource** will be called depends on target type.
 
 - **refresh**()
 
@@ -113,7 +113,11 @@ pager.of(url | data, {
 
 - **showPageSizeOptions** `optional`
 
-  Show page size options.
+  Show page size options, default `true` .
+
+- **showFirstLastButtons** `optional`
+
+  Show first and last button, default `true` .
 
 - **pageSizeOptions** `optional`
 
@@ -121,23 +125,23 @@ pager.of(url | data, {
 
 - **firstPageLabel** `optional`
 
-  First page button label text, default `第一页` .
+  First page button title text, default `第一页` .
 
 - **previousPageLabel** `optional`
 
-  Previous page button label text, default `上一页` .
+  Previous page button title text, default `上一页` .
 
 - **nextPageLabel** `optional`
 
-  Next page button label text, default `下一页` .
+  Next page button title text, default `下一页` .
 
 - **lastPageLabel** `optional`
 
-  Last page button label text, default `最后一页` .
+  Last page button title text, default `最后一页` .
 
-- **ajaxAdapter** `optional`
+- **ajaxAdapter** `optional` `ajax`
 
-  ajax paging adapter, custom ajax paging implementation, default `XMLHttpRequestAdapter`  .
+  ajax request adapter, custom ajax request implementation, default `XMLHttpRequestAdapter`  .
 
 #### Methods
 
@@ -149,20 +153,20 @@ pager.of(url | data, {
   (page: number, size: number, pages: number, length: number) => `第${page}/${pages}页，共${length}条`
   ```
 
-- **getPageParams** `optional`
+- **getPageParams** `optional` `ajax`
 
   Get necessary ajax request page params, default:
 
   ```typescript
-  (page, size) => ({page: page, size: size})
+  (page: number, size: number) => ({page: page, size: size})
   ```
 
-- **getPagedResource** `optional`
+- **getPagedResource** `optional` `ajax`
 
   Get custom paged resource format from ajax request response, default:
 
   ```typescript
-  response => ({data: response.data, length: response.pager.recordCount})
+  (response: any) => ({data: response.data, length: response.pager.recordCount})
   ```
 
 - **changes** `optional`
@@ -185,13 +189,13 @@ pager.of(url | data, {
 
   Request params such as query parameters from form, default `{}`, support `{}` and `FormData`, data will be parsed:
 
-  - GET: `{}` -> `form-urlencode`
+  - **GET**: `{}` -> `form-urlencode`
 
-  - POST: 
+  - **POST**: 
 
     `{}` -> `form-urlencode` (default)
 
-    `{}` -> `json` (ContentType:`application/json`)
+    `{}` -> `json` (ContentType: `application/json`)
 
     `{}` -> `FormData` (ContentType: `multipart/form-data`)
 
@@ -249,7 +253,7 @@ pager.of(url | data, {
 
 ### AjaxAdapter
 
-Basic ajax request paging adapter, built-in:
+Basic ajax request adapter, built-in:
 
 - **XMLHttpRequestAdapter** ` default`
 
