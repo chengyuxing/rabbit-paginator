@@ -56,6 +56,7 @@ export const createElement = (tagName: string, attributes: { [index: string]: an
 const initDomElements = Symbol('initDomElements');
 const updateActionStatus = Symbol('updateActionStatus');
 const updateRangeLabel = Symbol('updateRangeLabel');
+const updateCurrentPage = Symbol('updateCurrentPage');
 
 /**
  * paginator support ajax request and static array data paging.
@@ -258,7 +259,7 @@ export class axpager {
         this.config.ajaxAdapter.request(this.target, this.pageParams, initOption)
             .then(response => {
                 const {data, length} = this.config.getPagedResource(response);
-                this.length = length;
+                this[updateCurrentPage](length);
                 const pageEvent = this.pageEvent;
                 this.option.success(data, pageEvent, this.option.data);
                 this[updateActionStatus](pageEvent.page, pageEvent.pages, pageEvent.length);
@@ -280,7 +281,7 @@ export class axpager {
         this.option = Object.assign({}, defaultRequestOption, option);
         this.option.before(null);
         const filteredResource = this.target.filter(item => this.option.filter(item, this.option.data));
-        this.length = filteredResource.length;
+        this[updateCurrentPage](filteredResource.length);
         const pageEvent = this.pageEvent;
         const pagedResource = filteredResource.slice(pageEvent.start, pageEvent.end);
         this.option.success(pagedResource, pageEvent, this.option.data);
@@ -313,6 +314,19 @@ export class axpager {
         this.of(this.target, this.option);
     }
 
+    /**
+     * update current page by length, avoid current page &gt; total pages occurs display empty result.
+     * @param length result length
+     */
+    [updateCurrentPage](length: number) {
+        this.length = length;
+        const pageCount = this.pages;
+        this.currentPage = this.currentPage > pageCount ? pageCount : this.currentPage;
+    }
+
+    /**
+     * init pager dom elements by config.
+     */
     [initDomElements]() {
         this.container.innerHTML = '<div class="rabbit-pager"></div>';
 
@@ -341,10 +355,19 @@ export class axpager {
             .forEach(e => this.container.firstElementChild.appendChild(e));
     }
 
+    /**
+     * update range label text.
+     */
     [updateRangeLabel]() {
         this.labels.rangeLabel.innerHTML = this.config.getRangeLabel(this.currentPage, this.size, this.pages, this.length);
     }
 
+    /**
+     * update actions status.
+     * @param page current page
+     * @param pages total pages
+     * @param length result length
+     */
     [updateActionStatus](page: number, pages: number, length: number) {
         const a = page === 1;
         const b = pages === 1 || page === pages;
