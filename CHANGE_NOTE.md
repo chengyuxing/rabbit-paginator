@@ -1,5 +1,9 @@
 # change note
 
+## 1.0.3
+- Paging result optimized, avoid current page > totals page occurs display empty result.
+- Actions click event scope optimized.
+
 ## 1.0.2
 
 - Fixed array data paging **RequestOption**#filter not working bug.

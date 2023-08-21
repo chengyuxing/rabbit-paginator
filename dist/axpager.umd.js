@@ -139,6 +139,7 @@
     var initDomElements = Symbol('initDomElements');
     var updateActionStatus = Symbol('updateActionStatus');
     var updateRangeLabel = Symbol('updateRangeLabel');
+    var updateCurrentPage = Symbol('updateCurrentPage');
     /**
      * paginator support ajax request and static array data paging.
      */
@@ -202,7 +203,7 @@
                 pageSizePanel: createElement('DIV', { className: 'mat-page-size' }),
                 actionsPanel: createElement('DIV', { className: 'mat-range-actions' })
             };
-            this.container.addEventListener('click', function (e) {
+            this.panels.actionsPanel.addEventListener('click', function (e) {
                 var target = e.target;
                 if (target == null)
                     return;
@@ -326,7 +327,7 @@
             this.config.ajaxAdapter.request(this.target, this.pageParams, initOption)
                 .then(function (response) {
                 var _a = _this.config.getPagedResource(response), data = _a.data, length = _a.length;
-                _this.length = length;
+                _this[updateCurrentPage](length);
                 var pageEvent = _this.pageEvent;
                 _this.option.success(data, pageEvent, _this.option.data);
                 _this[updateActionStatus](pageEvent.page, pageEvent.pages, pageEvent.length);
@@ -348,7 +349,7 @@
             this.option = Object.assign({}, defaultRequestOption, option);
             this.option.before(null);
             var filteredResource = this.target.filter(function (item) { return _this.option.filter(item, _this.option.data); });
-            this.length = filteredResource.length;
+            this[updateCurrentPage](filteredResource.length);
             var pageEvent = this.pageEvent;
             var pagedResource = filteredResource.slice(pageEvent.start, pageEvent.end);
             this.option.success(pagedResource, pageEvent, this.option.data);
@@ -378,6 +379,18 @@
         axpager.prototype.refresh = function () {
             this.of(this.target, this.option);
         };
+        /**
+         * update current page by length, avoid current page &gt; total pages occurs display empty result.
+         * @param length result length
+         */
+        axpager.prototype[updateCurrentPage] = function (length) {
+            this.length = length;
+            var pageCount = this.pages;
+            this.currentPage = this.currentPage > pageCount ? pageCount : this.currentPage;
+        };
+        /**
+         * init pager dom elements by config.
+         */
         axpager.prototype[initDomElements] = function () {
             var _this = this;
             this.container.innerHTML = '<div class="rabbit-pager"></div>';
@@ -402,9 +415,18 @@
             ].filter(function (e) { return e !== null; })
                 .forEach(function (e) { return _this.container.firstElementChild.appendChild(e); });
         };
+        /**
+         * update range label text.
+         */
         axpager.prototype[updateRangeLabel] = function () {
             this.labels.rangeLabel.innerHTML = this.config.getRangeLabel(this.currentPage, this.size, this.pages, this.length);
         };
+        /**
+         * update actions status.
+         * @param page current page
+         * @param pages total pages
+         * @param length result length
+         */
         axpager.prototype[updateActionStatus] = function (page, pages, length) {
             var a = page === 1;
             var b = pages === 1 || page === pages;

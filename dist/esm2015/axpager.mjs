@@ -128,6 +128,7 @@ const createElement = (tagName, attributes = {}) => {
 const initDomElements = Symbol('initDomElements');
 const updateActionStatus = Symbol('updateActionStatus');
 const updateRangeLabel = Symbol('updateRangeLabel');
+const updateCurrentPage = Symbol('updateCurrentPage');
 /**
  * paginator support ajax request and static array data paging.
  */
@@ -190,7 +191,7 @@ class axpager {
             pageSizePanel: createElement('DIV', { className: 'mat-page-size' }),
             actionsPanel: createElement('DIV', { className: 'mat-range-actions' })
         };
-        this.container.addEventListener('click', e => {
+        this.panels.actionsPanel.addEventListener('click', e => {
             let target = e.target;
             if (target == null)
                 return;
@@ -301,7 +302,7 @@ class axpager {
         this.config.ajaxAdapter.request(this.target, this.pageParams, initOption)
             .then(response => {
             const { data, length } = this.config.getPagedResource(response);
-            this.length = length;
+            this[updateCurrentPage](length);
             const pageEvent = this.pageEvent;
             this.option.success(data, pageEvent, this.option.data);
             this[updateActionStatus](pageEvent.page, pageEvent.pages, pageEvent.length);
@@ -322,7 +323,7 @@ class axpager {
         this.option = Object.assign({}, defaultRequestOption, option);
         this.option.before(null);
         const filteredResource = this.target.filter(item => this.option.filter(item, this.option.data));
-        this.length = filteredResource.length;
+        this[updateCurrentPage](filteredResource.length);
         const pageEvent = this.pageEvent;
         const pagedResource = filteredResource.slice(pageEvent.start, pageEvent.end);
         this.option.success(pagedResource, pageEvent, this.option.data);
@@ -352,6 +353,18 @@ class axpager {
     refresh() {
         this.of(this.target, this.option);
     }
+    /**
+     * update current page by length, avoid current page &gt; total pages occurs display empty result.
+     * @param length result length
+     */
+    [updateCurrentPage](length) {
+        this.length = length;
+        const pageCount = this.pages;
+        this.currentPage = this.currentPage > pageCount ? pageCount : this.currentPage;
+    }
+    /**
+     * init pager dom elements by config.
+     */
     [initDomElements]() {
         this.container.innerHTML = '<div class="rabbit-pager"></div>';
         this.actions.selectPageSize.innerHTML = this.config.pageSizeOptions.map(num => `<option value="${num}">${num}</option>`).join('');
@@ -375,9 +388,18 @@ class axpager {
         ].filter(e => e !== null)
             .forEach(e => this.container.firstElementChild.appendChild(e));
     }
+    /**
+     * update range label text.
+     */
     [updateRangeLabel]() {
         this.labels.rangeLabel.innerHTML = this.config.getRangeLabel(this.currentPage, this.size, this.pages, this.length);
     }
+    /**
+     * update actions status.
+     * @param page current page
+     * @param pages total pages
+     * @param length result length
+     */
     [updateActionStatus](page, pages, length) {
         const a = page === 1;
         const b = pages === 1 || page === pages;

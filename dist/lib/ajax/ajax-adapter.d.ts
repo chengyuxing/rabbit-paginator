@@ -5,7 +5,7 @@ export declare const ContentType: {
     FORM_DATA: string;
 };
 /**
- * ajax paging adapter.
+ * ajax request adapter.
  */
 export interface AjaxAdapter {
     /**
