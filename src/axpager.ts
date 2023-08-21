@@ -141,7 +141,7 @@ export class axpager {
             actionsPanel: createElement('DIV', {className: 'mat-range-actions'}) as HTMLDivElement
         };
 
-        this.container.addEventListener('click', e => {
+        this.panels.actionsPanel.addEventListener('click', e => {
             let target = e.target as HTMLButtonElement;
             if (target == null) return;
             if (target.className === 'mat-btn-touch-target') {
