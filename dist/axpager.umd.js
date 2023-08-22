@@ -123,10 +123,10 @@
         filter: function (item, requestData) { return true; }
     };
     var icons = {
-        fastBackward: '<svg viewBox="0 0 24 24" focusable="false" class="rbt-icon"><path d="M18.41 16.59L13.82 12l4.59-4.59L17 6l-6 6 6 6zM6 6h2v12H6z"></path></svg>',
-        backward: '<svg viewBox="0 0 24 24" focusable="false" class="rbt-icon"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"></path></svg>',
-        forward: '<svg viewBox="0 0 24 24" focusable="false" class="rbt-icon"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg>',
-        fastForward: '<svg viewBox="0 0 24 24" focusable="false" class="rbt-icon"><path d="M5.59 7.41L10.18 12l-4.59 4.59L7 18l6-6-6-6zM16 6h2v12h-2z"></path></svg>',
+        fastBackward: '<svg viewBox="0 0 24 24" focusable="false" class="axp-icon"><path d="M18.41 16.59L13.82 12l4.59-4.59L17 6l-6 6 6 6zM6 6h2v12H6z"></path></svg>',
+        backward: '<svg viewBox="0 0 24 24" focusable="false" class="axp-icon"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"></path></svg>',
+        forward: '<svg viewBox="0 0 24 24" focusable="false" class="axp-icon"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg>',
+        fastForward: '<svg viewBox="0 0 24 24" focusable="false" class="axp-icon"><path d="M5.59 7.41L10.18 12l-4.59 4.59L7 18l6-6-6-6zM16 6h2v12h-2z"></path></svg>',
     };
     var createElement = function (tagName, attributes) {
         if (attributes === void 0) { attributes = {}; }
@@ -161,53 +161,53 @@
             this.size = this.config.pageSizeOptions[0] || 10;
             this.actions = {
                 selectPageSize: createElement('SELECT', {
-                    className: 'rbt-select rbt-size-options',
+                    className: 'axp-select axp-size-options',
                     disabled: true
                 }),
                 btnFirst: createElement('BUTTON', {
                     type: 'button',
                     title: this.config.firstPageLabel,
-                    innerHTML: "".concat(icons.fastBackward, "<span class=\"rbt-btn-touch-target\"></span>"),
-                    className: 'rbt-btn',
+                    innerHTML: "".concat(icons.fastBackward, "<span class=\"axp-btn-touch-target\"></span>"),
+                    className: 'axp-btn',
                     disabled: true
                 }),
                 btnPrev: createElement('BUTTON', {
                     type: 'button',
                     title: this.config.previousPageLabel,
-                    innerHTML: "".concat(icons.backward, "<span class=\"rbt-btn-touch-target\"></span>"),
-                    className: 'rbt-btn',
+                    innerHTML: "".concat(icons.backward, "<span class=\"axp-btn-touch-target\"></span>"),
+                    className: 'axp-btn',
                     disabled: true
                 }),
                 btnNext: createElement('BUTTON', {
                     type: 'button',
                     title: this.config.nextPageLabel,
-                    innerHTML: "".concat(icons.forward, "<span class=\"rbt-btn-touch-target\"></span>"),
-                    className: 'rbt-btn',
+                    innerHTML: "".concat(icons.forward, "<span class=\"axp-btn-touch-target\"></span>"),
+                    className: 'axp-btn',
                     disabled: true
                 }),
                 btnLast: createElement('BUTTON', {
                     type: 'button',
                     title: this.config.lastPageLabel,
-                    innerHTML: "".concat(icons.fastForward, "<span class=\"rbt-btn-touch-target\"></span>"),
-                    className: 'rbt-btn',
+                    innerHTML: "".concat(icons.fastForward, "<span class=\"axp-btn-touch-target\"></span>"),
+                    className: 'axp-btn',
                     disabled: true
                 }),
             };
             this.labels = {
                 itemsPerPageLabel: createElement('SPAN', {
-                    className: 'rbt-label rbt-items-per-page'
+                    className: 'axp-label axp-items-per-page'
                 }),
-                rangeLabel: createElement('SPAN', { className: 'rbt-label rbt-range' })
+                rangeLabel: createElement('SPAN', { className: 'axp-label axp-range' })
             };
             this.panels = {
-                pageSizePanel: createElement('DIV', { className: 'rbt-page-size' }),
-                actionsPanel: createElement('DIV', { className: 'rbt-range-actions' })
+                pageSizePanel: createElement('DIV', { className: 'axp-page-size' }),
+                actionsPanel: createElement('DIV', { className: 'axp-range-actions' })
             };
             this.panels.actionsPanel.addEventListener('click', function (e) {
                 var target = e.target;
                 if (target == null)
                     return;
-                if (target.className === 'rbt-btn-touch-target') {
+                if (target.className === 'axp-btn-touch-target') {
                     target = target.parentElement;
                 }
                 if (target == null || target.disabled) {
@@ -241,8 +241,12 @@
                 }
             });
             this.actions.selectPageSize.addEventListener('change', function (e) {
+                var select = e.target;
+                if (select.disabled) {
+                    return;
+                }
                 _this.previousPage = _this.currentPage;
-                _this.size = +e.target.value || 10;
+                _this.size = +select.value || 10;
                 var newPages = _this.pages;
                 if (_this.currentPage > newPages) {
                     _this.currentPage = newPages;
@@ -386,6 +390,17 @@
             this.of(this.target, this.option);
         };
         /**
+         * disable all actions (select and buttons).
+         * @param isDisable
+         */
+        axpager.prototype.disable = function (isDisable) {
+            if (isDisable) {
+                Object.values(this.actions).forEach(function (a) { return a.disabled = true; });
+                return;
+            }
+            this[updateActionStatus](this.currentPage, this.pages, this.length);
+        };
+        /**
          * update current page by length, avoid current page &gt; total pages occurs display empty result.
          * @param length result length
          */
@@ -399,7 +414,7 @@
          */
         axpager.prototype[initDomElements] = function () {
             var _this = this;
-            this.container.innerHTML = '<div class="rabbit-pager"></div>';
+            this.container.innerHTML = '<div class="ax-pager"></div>';
             this.actions.selectPageSize.innerHTML = this.config.pageSizeOptions.map(function (num) { return "<option value=\"".concat(num, "\">").concat(num, "</option>"); }).join('');
             this.labels.itemsPerPageLabel.innerHTML = this.config.itemsPerPageLabel + (this.config.showPageSizeOptions ? '' : this.config.pageSizeOptions[0] || 10);
             // page size panel
@@ -436,8 +451,8 @@
         axpager.prototype[updateActionStatus] = function (page, pages, length) {
             var disableFirstPrev = page <= 1;
             var disableNextLast = pages <= 1 || page === pages;
-            var firstPrevClz = "rbt-btn".concat(disableFirstPrev ? '' : ' rbt-ripple-btn');
-            var nextLastClz = "rbt-btn".concat(disableNextLast ? '' : ' rbt-ripple-btn');
+            var firstPrevClz = "axp-btn".concat(disableFirstPrev ? '' : ' axp-ripple-btn');
+            var nextLastClz = "axp-btn".concat(disableNextLast ? '' : ' axp-ripple-btn');
             this.actions.selectPageSize.disabled = length <= 0;
             this.actions.btnFirst.disabled = disableFirstPrev;
             this.actions.btnFirst.className = firstPrevClz;

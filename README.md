@@ -48,7 +48,7 @@ getPagedResource: response => ({data: response.data, length: response.pager.reco
 ```javascript
 const data = new Array(145);
 const pager = Paginator.init(document.getElementById('pager'), {
-  getPagedResource: // adapt response data
+  getPagedResource: // adapt response data for ajax
 });
 // pager.ajax(url, option)
 // pager.resource(data, option)
@@ -96,6 +96,10 @@ pager.of(url | data, {
 - **refresh**()
 
   Refresh current page's data.
+  
+- **disable**(isDisable: boolean)
+
+  If true disable all actions (select and buttons).
 
 ## Configuration
 

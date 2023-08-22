@@ -1,6 +1,6 @@
 {
   "name": "axpager",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "a simple paginator support ajax request and array paging.",
   "scripts": {
     "build": "rollup --config",
@@ -19,7 +19,9 @@
   "keywords": [
     "ajax",
     "ajax-paging",
+    "ajax-paginator",
     "paging",
+    "array-paging",
     "paginator",
     "page-helper",
     "pageable"

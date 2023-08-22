@@ -47,6 +47,7 @@
 <div style="display: flex;align-items: baseline">
     <h1>XPager Basic Example</h1>
     <label for="theme-check" style="margin-left: 20px">Theme: <input id="theme-check" type="checkbox"> dark?</label>
+    <label for="disable" style="margin-left: 20px">Status: <input id="disable" type="checkbox"> disable?</label>
 </div>
 <input type="text" id="term" placeholder="keywords...">
 <ul id="result"></ul>
@@ -58,12 +59,12 @@
 <script src="../axpager.umd.min.js"></script>
 <script>
     const {Paginator} = axpager;
-    const pager = Paginator.init(document.getElementById('pager'));
+    const paginator = Paginator.init(document.getElementById('pager'));
 
     doPaging();
 
     function doPaging() {
-        pager.of(data, {
+        paginator.of(data, {
             data: {
                 term: document.getElementById('term').value || ''
             },
@@ -75,7 +76,7 @@
                     }
                     return `<li>${item.id}. ${title}</li>`;
                 }).join('');
-                document.getElementById('input').innerHTML = 'Request data: ' + JSON.stringify(req, null, '');
+                document.getElementById('input').innerHTML = 'Request data: ' + JSON.stringify(req, null, ' ');
                 document.getElementById('output').innerHTML = 'Page event: ' + JSON.stringify(event, null, ' ');
             },
             filter: (item, req) => {
@@ -94,6 +95,14 @@
         }
         document.body.className = c;
         document.getElementById('theme').href = `../themes/axpager.theme.${c}.css`;
+    });
+
+    document.getElementById('disable').addEventListener('click', function () {
+        if (this.checked) {
+            paginator.disable(true);
+            return;
+        }
+        paginator.disable(false);
     });
 
     document.getElementById('term').addEventListener('input', e => {

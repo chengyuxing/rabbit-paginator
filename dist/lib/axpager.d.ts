@@ -71,6 +71,11 @@ export declare class axpager {
      */
     refresh(): void;
     /**
+     * disable all actions (select and buttons).
+     * @param isDisable
+     */
+    disable(isDisable: boolean): void;
+    /**
      * update current page by length, avoid current page &gt; total pages occurs display empty result.
      * @param length result length
      */

@@ -1,5 +1,13 @@
 # change note
 
+## 1.0.5
+
+- Container style class `rabbit-pager` change to `ax-pager`.
+- New instance method: `disable(isDisable: boolean)`.
+- Action `page size options` assert `disabled` attribute.
+- Update example.
+- Themes optimized.
+
 ## 1.0.4
 
 - Fixed empty array occurs pages and page properties value = 0
