@@ -365,7 +365,7 @@ class axpager {
     }
     /**
      * disable all actions (select and buttons).
-     * @param isDisable
+     * @param isDisable is disable all actions
      */
     disable(isDisable) {
         if (isDisable) {

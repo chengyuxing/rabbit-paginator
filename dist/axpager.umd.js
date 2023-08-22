@@ -391,7 +391,7 @@
         };
         /**
          * disable all actions (select and buttons).
-         * @param isDisable
+         * @param isDisable is disable all actions
          */
         axpager.prototype.disable = function (isDisable) {
             if (isDisable) {
