@@ -180,8 +180,12 @@ export class axpager {
         });
 
         this.actions.selectPageSize.addEventListener('change', e => {
+            const select = e.target as HTMLSelectElement;
+            if (select.disabled) {
+                return;
+            }
             this.previousPage = this.currentPage;
-            this.size = +(e.target as HTMLSelectElement).value || 10;
+            this.size = +select.value || 10;
             const newPages = this.pages;
             if (this.currentPage > newPages) {
                 this.currentPage = newPages;
@@ -318,6 +322,18 @@ export class axpager {
      */
     refresh() {
         this.of(this.target, this.option);
+    }
+
+    /**
+     * disable all actions (select and buttons).
+     * @param isDisable
+     */
+    disable(isDisable: boolean) {
+        if (isDisable) {
+            Object.values(this.actions).forEach(a => a.disabled = true);
+            return;
+        }
+        this[updateActionStatus](this.currentPage, this.pages, this.length);
     }
 
     /**
