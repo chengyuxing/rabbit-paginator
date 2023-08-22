@@ -30,7 +30,7 @@ export declare class axpager {
      */
     constructor(container: HTMLElement, config?: PageConfig);
     /**
-     * total pages count.
+     * total pages.
      */
     get pages(): number;
     /**

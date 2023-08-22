@@ -1,6 +1,12 @@
 # change note
 
+## 1.0.4
+
+- Fixed empty array occurs pages and page properties value = 0
+- Style class prefix mat change to rbt.
+
 ## 1.0.3
+
 - Paging result optimized, avoid current page > totals page occurs display empty result.
 - Actions click event scope optimized.
 
