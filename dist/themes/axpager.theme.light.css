@@ -5,40 +5,40 @@
     font-family: sans-serif;
 }
 
-.rabbit-pager .mat-label {
+.rabbit-pager .rbt-label {
     font-size: 12px;
 }
 
-.rabbit-pager > .mat-page-size {
+.rabbit-pager > .rbt-page-size {
     display: inherit;
     align-items: inherit;
     color: currentColor;
 }
 
-.rabbit-pager > .mat-page-size > * {
+.rabbit-pager > .rbt-page-size > * {
     padding: 8px;
 }
 
-.rabbit-pager > .mat-page-size > .mat-select {
+.rabbit-pager > .rbt-page-size > .rbt-select {
     border-radius: 4px;
     min-width: 75px;
 }
 
-.rabbit-pager > .mat-range-actions {
+.rabbit-pager > .rbt-range-actions {
     display: inherit;
     align-items: inherit;
     color: currentColor;
 }
 
-.rabbit-pager > .mat-range-actions > * {
+.rabbit-pager > .rbt-range-actions > * {
     padding: 8px;
 }
 
-.rabbit-pager > .mat-range-actions > .mat-range {
+.rabbit-pager > .rbt-range-actions > .rbt-range {
     margin: 0 15px;
 }
 
-.rabbit-pager > .mat-range-actions > .mat-btn {
+.rabbit-pager > .rbt-range-actions > .rbt-btn {
     display: inline-block;
     position: relative;
     box-sizing: border-box;
@@ -55,21 +55,21 @@
     padding: 12px;
 }
 
-.rabbit-pager > .mat-range-actions > .mat-btn[disabled] {
+.rabbit-pager > .rbt-range-actions > .rbt-btn[disabled] {
     pointer-events: none;
 }
 
-.rabbit-pager > .mat-range-actions > .mat-btn[disabled] > .mat-icon {
+.rabbit-pager > .rbt-range-actions > .rbt-btn[disabled] > .rbt-icon {
     fill: rgba(0, 0, 0, .12);
 }
 
-.rabbit-pager > .mat-range-actions > .mat-btn > .mat-icon {
+.rabbit-pager > .rbt-range-actions > .rbt-btn > .rbt-icon {
     fill: rgba(0, 0, 0, .54);
     width: 24px;
     height: 24px;
 }
 
-.rabbit-pager > .mat-range-actions > .mat-btn > .mat-btn-touch-target {
+.rabbit-pager > .rbt-range-actions > .rbt-btn > .rbt-btn-touch-target {
     position: absolute;
     top: 50%;
     height: 48px;
@@ -80,10 +80,10 @@
     border-radius: inherit;
 }
 
-.rabbit-pager > .mat-range-actions > .mat-ripple-btn:hover > .mat-btn-touch-target {
+.rabbit-pager > .rbt-range-actions > .rbt-ripple-btn:hover > .rbt-btn-touch-target {
     background-color: rgba(37, 37, 37, 0.05);
 }
 
-.rabbit-pager > .mat-range-actions > .mat-ripple-btn:active > .mat-btn-touch-target {
+.rabbit-pager > .rbt-range-actions > .rbt-ripple-btn:active > .rbt-btn-touch-target {
     background-color: rgba(37, 37, 37, 0.15);
 }

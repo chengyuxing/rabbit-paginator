@@ -39,10 +39,10 @@ const defaultRequestOption: RequestOption = {
 }
 
 const icons = {
-    fastBackward: '<svg viewBox="0 0 24 24" focusable="false" class="mat-icon"><path d="M18.41 16.59L13.82 12l4.59-4.59L17 6l-6 6 6 6zM6 6h2v12H6z"></path></svg>',
-    backward: '<svg viewBox="0 0 24 24" focusable="false" class="mat-icon"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"></path></svg>',
-    forward: '<svg viewBox="0 0 24 24" focusable="false" class="mat-icon"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg>',
-    fastForward: '<svg viewBox="0 0 24 24" focusable="false" class="mat-icon"><path d="M5.59 7.41L10.18 12l-4.59 4.59L7 18l6-6-6-6zM16 6h2v12h-2z"></path></svg>',
+    fastBackward: '<svg viewBox="0 0 24 24" focusable="false" class="rbt-icon"><path d="M18.41 16.59L13.82 12l4.59-4.59L17 6l-6 6 6 6zM6 6h2v12H6z"></path></svg>',
+    backward: '<svg viewBox="0 0 24 24" focusable="false" class="rbt-icon"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"></path></svg>',
+    forward: '<svg viewBox="0 0 24 24" focusable="false" class="rbt-icon"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg>',
+    fastForward: '<svg viewBox="0 0 24 24" focusable="false" class="rbt-icon"><path d="M5.59 7.41L10.18 12l-4.59 4.59L7 18l6-6-6-6zM16 6h2v12h-2z"></path></svg>',
 };
 
 export const createElement = (tagName: string, attributes: { [index: string]: any } = {}): HTMLElement => {
@@ -97,58 +97,58 @@ export class axpager {
         this.size = this.config.pageSizeOptions[0] || 10;
         this.actions = {
             selectPageSize: createElement('SELECT', {
-                className: 'mat-select mat-size-options',
+                className: 'rbt-select rbt-size-options',
                 disabled: true
             }) as HTMLSelectElement,
             btnFirst: createElement('BUTTON', {
                 type: 'button',
                 title: this.config.firstPageLabel,
-                innerHTML: `${icons.fastBackward}<span class="mat-btn-touch-target"></span>`,
-                className: 'mat-btn',
+                innerHTML: `${icons.fastBackward}<span class="rbt-btn-touch-target"></span>`,
+                className: 'rbt-btn',
                 disabled: true
             }) as HTMLButtonElement,
             btnPrev: createElement('BUTTON', {
                 type: 'button',
                 title: this.config.previousPageLabel,
-                innerHTML: `${icons.backward}<span class="mat-btn-touch-target"></span>`,
-                className: 'mat-btn',
+                innerHTML: `${icons.backward}<span class="rbt-btn-touch-target"></span>`,
+                className: 'rbt-btn',
                 disabled: true
             }) as HTMLButtonElement,
             btnNext: createElement('BUTTON', {
                 type: 'button',
                 title: this.config.nextPageLabel,
-                innerHTML: `${icons.forward}<span class="mat-btn-touch-target"></span>`,
-                className: 'mat-btn',
+                innerHTML: `${icons.forward}<span class="rbt-btn-touch-target"></span>`,
+                className: 'rbt-btn',
                 disabled: true
             }) as HTMLButtonElement,
             btnLast: createElement('BUTTON', {
                 type: 'button',
                 title: this.config.lastPageLabel,
-                innerHTML: `${icons.fastForward}<span class="mat-btn-touch-target"></span>`,
-                className: 'mat-btn',
+                innerHTML: `${icons.fastForward}<span class="rbt-btn-touch-target"></span>`,
+                className: 'rbt-btn',
                 disabled: true
             }) as HTMLButtonElement,
         };
 
         this.labels = {
             itemsPerPageLabel: createElement('SPAN', {
-                className: 'mat-label mat-items-per-page'
+                className: 'rbt-label rbt-items-per-page'
             }) as HTMLSpanElement,
-            rangeLabel: createElement('SPAN', {className: 'mat-label mat-range'}) as HTMLSpanElement
+            rangeLabel: createElement('SPAN', {className: 'rbt-label rbt-range'}) as HTMLSpanElement
         };
 
         this.panels = {
-            pageSizePanel: createElement('DIV', {className: 'mat-page-size'}) as HTMLDivElement,
-            actionsPanel: createElement('DIV', {className: 'mat-range-actions'}) as HTMLDivElement
+            pageSizePanel: createElement('DIV', {className: 'rbt-page-size'}) as HTMLDivElement,
+            actionsPanel: createElement('DIV', {className: 'rbt-range-actions'}) as HTMLDivElement
         };
 
         this.panels.actionsPanel.addEventListener('click', e => {
             let target = e.target as HTMLButtonElement;
             if (target == null) return;
-            if (target.className === 'mat-btn-touch-target') {
+            if (target.className === 'rbt-btn-touch-target') {
                 target = target.parentElement as HTMLButtonElement;
             }
-            if (target.disabled) {
+            if (target == null || target.disabled) {
                 return;
             }
             const actions = this.actions;
@@ -378,8 +378,8 @@ export class axpager {
         const disableFirstPrev = page <= 1;
         const disableNextLast = pages <= 1 || page === pages;
 
-        const firstPrevClz = `mat-btn${disableFirstPrev ? '' : ' mat-ripple-btn'}`;
-        const nextLastClz = `mat-btn${disableNextLast ? '' : ' mat-ripple-btn'}`;
+        const firstPrevClz = `rbt-btn${disableFirstPrev ? '' : ' rbt-ripple-btn'}`;
+        const nextLastClz = `rbt-btn${disableNextLast ? '' : ' rbt-ripple-btn'}`;
 
         this.actions.selectPageSize.disabled = length <= 0;
 
