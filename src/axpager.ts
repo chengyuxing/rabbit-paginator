@@ -194,10 +194,16 @@ export class axpager {
     }
 
     /**
-     * total pages count.
+     * total pages.
      */
     get pages(): number {
+        if (this.length <= 1) {
+            return 1;
+        }
         const num = this.length / this.size;
+        if (num <= 1) {
+            return 1;
+        }
         const int = Math.floor(num);
         if (int === num) {
             return int;
@@ -369,22 +375,22 @@ export class axpager {
      * @param length result length
      */
     [updateActionStatus](page: number, pages: number, length: number) {
-        const a = page === 1;
-        const b = pages === 1 || page === pages;
+        const disableFirstPrev = page <= 1;
+        const disableNextLast = pages <= 1 || page === pages;
 
-        const ra = `mat-btn${a ? '' : ' mat-ripple-btn'}`;
-        const rb = `mat-btn${b ? '' : ' mat-ripple-btn'}`;
+        const firstPrevClz = `mat-btn${disableFirstPrev ? '' : ' mat-ripple-btn'}`;
+        const nextLastClz = `mat-btn${disableNextLast ? '' : ' mat-ripple-btn'}`;
 
-        this.actions.selectPageSize.disabled = length === 0;
+        this.actions.selectPageSize.disabled = length <= 0;
 
-        this.actions.btnFirst.disabled = a;
-        this.actions.btnFirst.className = ra;
-        this.actions.btnPrev.disabled = a;
-        this.actions.btnPrev.className = ra;
+        this.actions.btnFirst.disabled = disableFirstPrev;
+        this.actions.btnFirst.className = firstPrevClz;
+        this.actions.btnPrev.disabled = disableFirstPrev;
+        this.actions.btnPrev.className = firstPrevClz;
 
-        this.actions.btnNext.disabled = b;
-        this.actions.btnNext.className = rb;
-        this.actions.btnLast.disabled = b;
-        this.actions.btnLast.className = rb;
+        this.actions.btnNext.disabled = disableNextLast;
+        this.actions.btnNext.className = nextLastClz;
+        this.actions.btnLast.disabled = disableNextLast;
+        this.actions.btnLast.className = nextLastClz;
     }
 }
