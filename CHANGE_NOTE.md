@@ -4,7 +4,7 @@
 
 - New Property: PageConfig#initPageNumber.
 - New instance method: goto(page: number).
-- Update instance method: disable() will be stop actions events, actions dom and paging action.
+- Update instance method: disable(true) will be stop actions events, actions dom and paging action.
 
 ## 1.0.5
 
