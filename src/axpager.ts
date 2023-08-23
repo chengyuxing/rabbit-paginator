@@ -95,6 +95,7 @@ export class axpager {
     constructor(container: HTMLElement, config?: PageConfig) {
         this.container = container;
         this.config = Object.assign({}, defaultPageConfig, config);
+        this.currentPage = this.config.initPageNumber || 1;
         this.size = this.config.pageSizeOptions[0] || 10;
         this.actions = {
             selectPageSize: createElement('SELECT', {
@@ -335,6 +336,27 @@ export class axpager {
      */
     refresh() {
         this.of(this.target, this.option);
+    }
+
+    /**
+     * goto target page number.
+     * @param page target page number
+     */
+    goto(page: number) {
+        if (this.disabled) {
+            return;
+        }
+        if (typeof page !== 'number') {
+            throw Error('page must be number.');
+        }
+        this.previousPage = this.currentPage;
+        if (page < 1) {
+            this.currentPage = 1;
+        } else {
+            const pageCount = this.pages;
+            this.currentPage = page > pageCount ? pageCount : page;
+        }
+        this.refresh();
     }
 
     /**
