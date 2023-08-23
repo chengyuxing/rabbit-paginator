@@ -85,6 +85,7 @@ export class axpager {
     private length: number = 0;
     private size: number = 0;
     private option: RequestOption;
+    private disabled = false;
 
     /**
      * paginator.
@@ -143,6 +144,9 @@ export class axpager {
         };
 
         this.panels.actionsPanel.addEventListener('click', e => {
+            if (this.disabled) {
+                return;
+            }
             let target = e.target as HTMLButtonElement;
             if (target == null) return;
             if (target.className === 'axp-btn-touch-target') {
@@ -180,6 +184,9 @@ export class axpager {
         });
 
         this.actions.selectPageSize.addEventListener('change', e => {
+            if (this.disabled) {
+                return;
+            }
             const select = e.target as HTMLSelectElement;
             if (select.disabled) {
                 return;
@@ -254,6 +261,9 @@ export class axpager {
      * @param option option
      */
     ajax(url: string, option?: RequestOption) {
+        if (this.disabled) {
+            return;
+        }
         if (!(typeof url === 'string')) {
             throw Error('Request url is required.');
         }
@@ -284,6 +294,9 @@ export class axpager {
      * @param option option
      */
     resource(data: any[], option?: RequestOption) {
+        if (this.disabled) {
+            return;
+        }
         if (!(data instanceof Array)) {
             throw Error('data must be an Array.');
         }
@@ -329,7 +342,8 @@ export class axpager {
      * @param isDisable is disable all actions
      */
     disable(isDisable: boolean) {
-        if (isDisable) {
+        this.disabled = isDisable;
+        if (this.disabled) {
             Object.values(this.actions).forEach(a => a.disabled = true);
             return;
         }
@@ -391,6 +405,9 @@ export class axpager {
      * @param length result length
      */
     [updateActionStatus](page: number, pages: number, length: number) {
+        if (this.disabled) {
+            return;
+        }
         const disableFirstPrev = page <= 1;
         const disableNextLast = pages <= 1 || page === pages;
 
