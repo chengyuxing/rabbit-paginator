@@ -34,7 +34,7 @@ const defaultRequestOption: RequestOption = {
     timeout: -1,
     before: init => void (0),
     success: (data, pageEvent, requestData) => void (0),
-    error: error => void 0,
+    error: error => void (0),
     finish: () => void (0),
     filter: (item, requestData) => true
 }
