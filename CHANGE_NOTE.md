@@ -1,5 +1,11 @@
 # change note
 
+## 1.0.6
+
+- New Property: PageConfig#initPageNumber.
+- New instance method: goto(page: number).
+- Update instance method: disable() will be stop actions events, actions dom and paging action.
+
 ## 1.0.5
 
 - Container style class `rabbit-pager` change to `ax-pager`.

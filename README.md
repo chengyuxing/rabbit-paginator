@@ -146,7 +146,11 @@ Get into `dist/example/index.html` demo preview.
   
 - **disable**(isDisable: boolean)
 
-  If true disable all actions (select and buttons).
+  If true disable all actions (select, buttons, actions events and paging action).
+  
+- **goto**(page: number)
+
+  Goto target page number.
 
 ## Configuration
 
@@ -169,6 +173,10 @@ Get into `dist/example/index.html` demo preview.
 - **showFirstLastButtons** `optional`
 
   Show first and last button, default `true` .
+
+- **initPageNumber** `optional`
+
+  Instance init page number, default `1` .
 
 - **pageSizeOptions** `optional`
 
@@ -324,4 +332,22 @@ Basic ajax request adapter, built-in:
   (url: string, pageParams: {}, reqOption: RequestInitOption): Promise<any>
   ```
 
-  Request method, resolve response and reject exception.
+  Request method, **resolve** response and **reject** exception.
+
+##### Example
+
+```javascript
+class MyAdapter implements AjaxAdapter {
+	request(url: string, pageParams: {}, reqOption: RequestInitOption): Promise<any>{
+		fetch(url, option)
+                .then(response => {
+                    if (response.ok) {
+                        response.json().then(resolve);
+                        return;
+                    }
+                    reject(response.status + ': ' + (response.statusText || 'request failed.'));
+                }).catch(reject);
+	}
+}
+```
+
