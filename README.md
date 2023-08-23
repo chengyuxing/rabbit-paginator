@@ -352,4 +352,3 @@ class MyAdapter implements AjaxAdapter {
 	}
 }
 ```
-
