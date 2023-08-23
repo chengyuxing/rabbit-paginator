@@ -1,6 +1,6 @@
 # change note
 
-## 1.0.6
+## 1.0.7
 
 - New Property: PageConfig#initPageNumber.
 - New instance method: goto(page: number).
