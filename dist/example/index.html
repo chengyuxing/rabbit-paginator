@@ -50,7 +50,6 @@
     <label for="disable" style="margin-left: 20px">Status: <input id="disable" type="checkbox"> disable?</label>
 </div>
 <input type="text" id="term" placeholder="keywords...">
-<button id="goto">GOTO 8th page</button>
 <ul id="result"></ul>
 <div id="pager" style=""></div>
 <p id="input"></p>
@@ -61,7 +60,7 @@
 <script>
     const {Paginator} = axpager;
     const paginator = Paginator.init(document.getElementById('pager'), {
-        initPageNumber: 70
+        initPageNumber: 3
     });
 
     doPaging();
@@ -110,10 +109,6 @@
 
     document.getElementById('term').addEventListener('input', e => {
         doPaging();
-    });
-
-    document.getElementById('goto').addEventListener('click', e => {
-        paginator.goto(8);
     });
 </script>
 </body>
