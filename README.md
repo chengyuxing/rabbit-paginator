@@ -336,7 +336,7 @@ Basic ajax request adapter, built-in:
 
 ##### Example
 
-```javascript
+```typescript
 class MyAdapter implements AjaxAdapter {
 	request(url: string, pageParams: {}, reqOption: RequestInitOption): Promise<any> {
       return new Promise((resolve, reject) => {
