@@ -338,15 +338,17 @@ Basic ajax request adapter, built-in:
 
 ```javascript
 class MyAdapter implements AjaxAdapter {
-	request(url: string, pageParams: {}, reqOption: RequestInitOption): Promise<any>{
-		fetch(url, option)
+	request(url: string, pageParams: {}, reqOption: RequestInitOption): Promise<any> {
+      return new Promise((resolve, reject) => {
+        fetch(url, option)
                 .then(response => {
-                    if (response.ok) {
-                        response.json().then(resolve);
-                        return;
-                    }
-                    reject(response.status + ': ' + (response.statusText || 'request failed.'));
+                  if (response.ok) {
+                    response.json().then(resolve);
+                    return;
+                  }
+                  reject(response.status + ': ' + (response.statusText || 'request failed.'));
                 }).catch(reject);
+      });
 	}
 }
 ```
