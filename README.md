@@ -36,7 +36,7 @@ import {Paginator} from 'axpager';
 const {Paginator} = axpager;
 ```
 
-**Example**
+### **Example**
 
 Rewrite function `PageConfig#getPagedResource`  to adapt  **ajax request paging** if  your response data format cannot match `{data: any[], length: number}` :
 
@@ -55,6 +55,28 @@ paginator.of(url | array, {
     success: (list, event, req) => {
         // ...
     }
+});
+```
+
+**Ajax request paging**
+
+```javascript
+const paginator = Paginator.init(document.getElementById('pager'));
+paginator.of('http://localhost:8080/users', {
+  data:{
+    username: 'jack'
+  },
+  before: init => {
+    // send cookie to server
+    // default xhr: init.withCredentials = true;
+    // fetch api: init.credentials = 'include'
+  },
+  success: (list, event, req) => {
+    // GET: actually request url: 'http://localhost:8080/users?page=1&size=10&username=jack'
+  },
+  error: err => {
+    
+  }
 });
 ```
 
@@ -77,6 +99,8 @@ paginator.of([1,2,3,4,5,6,7,8,9], {
   }
 });
 ```
+
+Above examples is default **PageConfig** and **RequestOption**. 
 
 Get more information from [PageConfig](#PageConfig) and [RequestOption](#RequestOption) .
 
