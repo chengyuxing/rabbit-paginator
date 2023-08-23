@@ -16,6 +16,7 @@ const defaultPageConfig: PageConfig = {
     hidePageSize: false,
     showFirstLastButtons: true,
     showPageSizeOptions: true,
+    initPageNumber: 1,
     pageSizeOptions: [10, 15, 30],
     ajaxAdapter: new XMLHttpRequestAdapter(),
     getRangeLabel: (page, size, pages, length) => `第${page}/${pages}页，共${length}条`,
