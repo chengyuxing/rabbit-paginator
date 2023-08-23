@@ -38,7 +38,7 @@ const {Paginator} = axpager;
 
 **Example**
 
-Rewrite function `getPagedResource`  to adapt  **ajax request paging** if  your response data format cannot match `{data: any[], length: number}` :
+Rewrite function `PageConfig#getPagedResource`  to adapt  **ajax request paging** if  your response data format cannot match `{data: any[], length: number}` :
 
 ```javascript
 // Bulit-in default implementation.
@@ -46,18 +46,41 @@ getPagedResource: response => ({data: response.data, length: response.pager.reco
 ```
 
 ```javascript
-const data = new Array(145);
-const pager = Paginator.init(document.getElementById('pager'), {
+const paginator = Paginator.init(document.getElementById('pager'), {
   getPagedResource: // adapt response data for ajax
 });
-// pager.ajax(url, option)
-// pager.resource(data, option)
-pager.of(url | data, {
-    success: (list, event) => {
+// pager.ajax(url, requestOption)
+// pager.resource(array, requestOption)
+paginator.of(url | array, {
+    success: (list, event, req) => {
         // ...
     }
 });
 ```
+
+**Array data paging**
+
+```javascript
+const paginator = Paginator.init(document.getElementById('pager'));
+paginator.of([1,2,3,4,5,6,7,8,9], {
+  data: {
+    num: 5
+  },
+  success: (list, event, req) => {
+    // list: [5]
+    // req: {num: 5}
+  },
+  filter: (item, req) => {
+    // item: each num of array.
+    // req: {num: 5}
+    return item === req.num;
+  }
+});
+```
+
+Get more information from [PageConfig](#PageConfig) and [RequestOption](#RequestOption) .
+
+Get into `dist/example/index.html` demo preview.
 
 ## Constructor
 
