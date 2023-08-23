@@ -119,7 +119,7 @@
         timeout: -1,
         before: function (init) { return void (0); },
         success: function (data, pageEvent, requestData) { return void (0); },
-        error: function (error) { return void 0; },
+        error: function (error) { return void (0); },
         finish: function () { return void (0); },
         filter: function (item, requestData) { return true; }
     };
