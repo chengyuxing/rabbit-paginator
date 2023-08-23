@@ -15,6 +15,7 @@ export interface PageConfig {
     hidePageSize?: boolean;
     showPageSizeOptions?: boolean;
     showFirstLastButtons?: boolean;
+    initPageNumber?: number;
     pageSizeOptions?: number[];
     /**
      * range label content callback.

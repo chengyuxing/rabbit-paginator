@@ -23,6 +23,7 @@ export declare class axpager {
     private length;
     private size;
     private option;
+    private disabled;
     /**
      * paginator.
      * @param container container element
@@ -70,6 +71,11 @@ export declare class axpager {
      * refresh current page's data.
      */
     refresh(): void;
+    /**
+     * goto target page number.
+     * @param page target page number
+     */
+    goto(page: number): void;
     /**
      * disable all actions (select and buttons).
      * @param isDisable is disable all actions

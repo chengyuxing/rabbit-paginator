@@ -91,6 +91,7 @@ const defaultPageConfig = {
     hidePageSize: false,
     showFirstLastButtons: true,
     showPageSizeOptions: true,
+    initPageNumber: 1,
     pageSizeOptions: [10, 15, 30],
     ajaxAdapter: new XMLHttpRequestAdapter(),
     getRangeLabel: (page, size, pages, length) => `第${page}/${pages}页，共${length}条`,
@@ -144,8 +145,10 @@ class axpager {
         this.currentPage = 1;
         this.length = 0;
         this.size = 0;
+        this.disabled = false;
         this.container = container;
         this.config = Object.assign({}, defaultPageConfig, config);
+        this.currentPage = this.config.initPageNumber || 1;
         this.size = this.config.pageSizeOptions[0] || 10;
         this.actions = {
             selectPageSize: createElement('SELECT', {
@@ -192,6 +195,9 @@ class axpager {
             actionsPanel: createElement('DIV', { className: 'axp-range-actions' })
         };
         this.panels.actionsPanel.addEventListener('click', e => {
+            if (this.disabled) {
+                return;
+            }
             let target = e.target;
             if (target == null)
                 return;
@@ -229,6 +235,9 @@ class axpager {
             }
         });
         this.actions.selectPageSize.addEventListener('change', e => {
+            if (this.disabled) {
+                return;
+            }
             const select = e.target;
             if (select.disabled) {
                 return;
@@ -297,6 +306,9 @@ class axpager {
      * @param option option
      */
     ajax(url, option) {
+        if (this.disabled) {
+            return;
+        }
         if (!(typeof url === 'string')) {
             throw Error('Request url is required.');
         }
@@ -326,6 +338,9 @@ class axpager {
      * @param option option
      */
     resource(data, option) {
+        if (this.disabled) {
+            return;
+        }
         if (!(data instanceof Array)) {
             throw Error('data must be an Array.');
         }
@@ -364,11 +379,33 @@ class axpager {
         this.of(this.target, this.option);
     }
     /**
+     * goto target page number.
+     * @param page target page number
+     */
+    goto(page) {
+        if (this.disabled) {
+            return;
+        }
+        if (typeof page !== 'number') {
+            throw Error('page must be number.');
+        }
+        this.previousPage = this.currentPage;
+        if (page < 1) {
+            this.currentPage = 1;
+        }
+        else {
+            const pageCount = this.pages;
+            this.currentPage = page > pageCount ? pageCount : page;
+        }
+        this.refresh();
+    }
+    /**
      * disable all actions (select and buttons).
      * @param isDisable is disable all actions
      */
     disable(isDisable) {
-        if (isDisable) {
+        this.disabled = isDisable;
+        if (this.disabled) {
             Object.values(this.actions).forEach(a => a.disabled = true);
             return;
         }
@@ -422,6 +459,9 @@ class axpager {
      * @param length result length
      */
     [updateActionStatus](page, pages, length) {
+        if (this.disabled) {
+            return;
+        }
         const disableFirstPrev = page <= 1;
         const disableNextLast = pages <= 1 || page === pages;
         const firstPrevClz = `axp-btn${disableFirstPrev ? '' : ' axp-ripple-btn'}`;

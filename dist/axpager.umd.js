@@ -101,6 +101,7 @@
         hidePageSize: false,
         showFirstLastButtons: true,
         showPageSizeOptions: true,
+        initPageNumber: 1,
         pageSizeOptions: [10, 15, 30],
         ajaxAdapter: new XMLHttpRequestAdapter(),
         getRangeLabel: function (page, size, pages, length) { return "\u7B2C".concat(page, "/").concat(pages, "\u9875\uFF0C\u5171").concat(length, "\u6761"); },
@@ -156,8 +157,10 @@
             this.currentPage = 1;
             this.length = 0;
             this.size = 0;
+            this.disabled = false;
             this.container = container;
             this.config = Object.assign({}, defaultPageConfig, config);
+            this.currentPage = this.config.initPageNumber || 1;
             this.size = this.config.pageSizeOptions[0] || 10;
             this.actions = {
                 selectPageSize: createElement('SELECT', {
@@ -204,6 +207,9 @@
                 actionsPanel: createElement('DIV', { className: 'axp-range-actions' })
             };
             this.panels.actionsPanel.addEventListener('click', function (e) {
+                if (_this.disabled) {
+                    return;
+                }
                 var target = e.target;
                 if (target == null)
                     return;
@@ -241,6 +247,9 @@
                 }
             });
             this.actions.selectPageSize.addEventListener('change', function (e) {
+                if (_this.disabled) {
+                    return;
+                }
                 var select = e.target;
                 if (select.disabled) {
                     return;
@@ -322,6 +331,9 @@
          */
         axpager.prototype.ajax = function (url, option) {
             var _this = this;
+            if (this.disabled) {
+                return;
+            }
             if (!(typeof url === 'string')) {
                 throw Error('Request url is required.');
             }
@@ -352,6 +364,9 @@
          */
         axpager.prototype.resource = function (data, option) {
             var _this = this;
+            if (this.disabled) {
+                return;
+            }
             if (!(data instanceof Array)) {
                 throw Error('data must be an Array.');
             }
@@ -390,11 +405,33 @@
             this.of(this.target, this.option);
         };
         /**
+         * goto target page number.
+         * @param page target page number
+         */
+        axpager.prototype.goto = function (page) {
+            if (this.disabled) {
+                return;
+            }
+            if (typeof page !== 'number') {
+                throw Error('page must be number.');
+            }
+            this.previousPage = this.currentPage;
+            if (page < 1) {
+                this.currentPage = 1;
+            }
+            else {
+                var pageCount = this.pages;
+                this.currentPage = page > pageCount ? pageCount : page;
+            }
+            this.refresh();
+        };
+        /**
          * disable all actions (select and buttons).
          * @param isDisable is disable all actions
          */
         axpager.prototype.disable = function (isDisable) {
-            if (isDisable) {
+            this.disabled = isDisable;
+            if (this.disabled) {
                 Object.values(this.actions).forEach(function (a) { return a.disabled = true; });
                 return;
             }
@@ -449,6 +486,9 @@
          * @param length result length
          */
         axpager.prototype[updateActionStatus] = function (page, pages, length) {
+            if (this.disabled) {
+                return;
+            }
             var disableFirstPrev = page <= 1;
             var disableNextLast = pages <= 1 || page === pages;
             var firstPrevClz = "axp-btn".concat(disableFirstPrev ? '' : ' axp-ripple-btn');
