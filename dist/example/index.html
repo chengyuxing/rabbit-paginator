@@ -100,11 +100,7 @@
     });
 
     document.getElementById('disable').addEventListener('click', function () {
-        if (this.checked) {
-            paginator.disable(true);
-            return;
-        }
-        paginator.disable(false);
+        paginator.disable(this.checked);
     });
 
     document.getElementById('term').addEventListener('input', e => {
