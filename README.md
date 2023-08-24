@@ -178,6 +178,10 @@ Get into `dist/example/index.html` demo preview.
 
   Instance init page number, default `1` .
 
+- **initPageSize** `optional`
+
+- Instance init page size, default `pageSizeOptions[0]` or `10` . 
+
 - **pageSizeOptions** `optional`
 
   Page size options, default `[10, 15, 30]` .

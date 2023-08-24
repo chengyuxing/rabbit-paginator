@@ -1,5 +1,9 @@
 # change note
 
+## 1.1.1
+
+- New Property: PageConfig#initPageSize.
+
 ## 1.1.0
 
 - New Property: PageConfig#initPageNumber.

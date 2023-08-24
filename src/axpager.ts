@@ -8,7 +8,7 @@ import {XMLHttpRequestAdapter} from "./ajax/adapters/xml-http-request-adapter";
  * default page init config.
  */
 const defaultPageConfig: PageConfig = {
-    itemsPerPageLabel: '每页条数',
+    itemsPerPageLabel: '每页条数 ',
     firstPageLabel: '第一页',
     previousPageLabel: '上一页',
     nextPageLabel: '下一页',
@@ -17,6 +17,7 @@ const defaultPageConfig: PageConfig = {
     showFirstLastButtons: true,
     showPageSizeOptions: true,
     initPageNumber: 1,
+    initPageSize: 10,
     pageSizeOptions: [10, 15, 30],
     ajaxAdapter: new XMLHttpRequestAdapter(),
     getRangeLabel: (page, size, pages, length) => `第${page}/${pages}页，共${length}条`,
@@ -97,7 +98,7 @@ export class axpager {
         this.container = container;
         this.config = Object.assign({}, defaultPageConfig, config);
         this.currentPage = this.config.initPageNumber || 1;
-        this.size = this.config.pageSizeOptions[0] || 10;
+        this.size = this.config.pageSizeOptions.includes(this.config.initPageSize) ? this.config.initPageSize : (this.config.pageSizeOptions[0] || 10);
         this.actions = {
             selectPageSize: createElement('SELECT', {
                 className: 'axp-select axp-size-options',
@@ -389,8 +390,8 @@ export class axpager {
     [initDomElements]() {
         this.container.innerHTML = '<div class="ax-pager"></div>';
 
-        this.actions.selectPageSize.innerHTML = this.config.pageSizeOptions.map(num => `<option value="${num}">${num}</option>`).join('');
-        this.labels.itemsPerPageLabel.innerHTML = this.config.itemsPerPageLabel + (this.config.showPageSizeOptions ? '' : this.config.pageSizeOptions[0] || 10);
+        this.actions.selectPageSize.innerHTML = this.config.pageSizeOptions.map(num => `<option value="${num}" ${this.size === num ? 'selected' : ''}>${num}</option>`).join('');
+        this.labels.itemsPerPageLabel.innerHTML = this.config.itemsPerPageLabel + (this.config.showPageSizeOptions ? '' : this.size);
 
         // page size panel
         [this.labels.itemsPerPageLabel,
