@@ -165,6 +165,7 @@ export class axpager {
             }
             const actions = this.actions;
             let matched = true;
+            const tempPreviousPage = this.previousPage;
             this.previousPage = this.currentPage;
             switch (target) {
                 case actions.btnFirst:
@@ -182,6 +183,7 @@ export class axpager {
                     this.currentPage = this.pages;
                     break;
                 default:
+                    this.previousPage = tempPreviousPage;
                     matched = false;
                     break;
             }
