@@ -93,7 +93,7 @@
      * default page init config.
      */
     var defaultPageConfig = {
-        itemsPerPageLabel: '每页条数',
+        itemsPerPageLabel: '每页条数 ',
         firstPageLabel: '第一页',
         previousPageLabel: '上一页',
         nextPageLabel: '下一页',
@@ -102,6 +102,7 @@
         showFirstLastButtons: true,
         showPageSizeOptions: true,
         initPageNumber: 1,
+        initPageSize: 10,
         pageSizeOptions: [10, 15, 30],
         ajaxAdapter: new XMLHttpRequestAdapter(),
         getRangeLabel: function (page, size, pages, length) { return "\u7B2C".concat(page, "/").concat(pages, "\u9875\uFF0C\u5171").concat(length, "\u6761"); },
@@ -129,6 +130,11 @@
         forward: '<svg viewBox="0 0 24 24" focusable="false" class="axp-icon"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg>',
         fastForward: '<svg viewBox="0 0 24 24" focusable="false" class="axp-icon"><path d="M5.59 7.41L10.18 12l-4.59 4.59L7 18l6-6-6-6zM16 6h2v12h-2z"></path></svg>',
     };
+    /**
+     * create html element
+     * @param tagName tag name
+     * @param attributes attributes
+     */
     var createElement = function (tagName, attributes) {
         if (attributes === void 0) { attributes = {}; }
         var e = document.createElement(tagName);
@@ -161,7 +167,7 @@
             this.container = container;
             this.config = Object.assign({}, defaultPageConfig, config);
             this.currentPage = this.config.initPageNumber || 1;
-            this.size = this.config.pageSizeOptions[0] || 10;
+            this.size = this.config.pageSizeOptions.includes(this.config.initPageSize) ? this.config.initPageSize : (this.config.pageSizeOptions[0] || 10);
             this.actions = {
                 selectPageSize: createElement('SELECT', {
                     className: 'axp-select axp-size-options',
@@ -452,8 +458,8 @@
         axpager.prototype[initDomElements] = function () {
             var _this = this;
             this.container.innerHTML = '<div class="ax-pager"></div>';
-            this.actions.selectPageSize.innerHTML = this.config.pageSizeOptions.map(function (num) { return "<option value=\"".concat(num, "\">").concat(num, "</option>"); }).join('');
-            this.labels.itemsPerPageLabel.innerHTML = this.config.itemsPerPageLabel + (this.config.showPageSizeOptions ? '' : this.config.pageSizeOptions[0] || 10);
+            this.actions.selectPageSize.innerHTML = this.config.pageSizeOptions.map(function (num) { return "<option value=\"".concat(num, "\" ").concat(_this.size === num ? 'selected' : '', ">").concat(num, "</option>"); }).join('');
+            this.labels.itemsPerPageLabel.innerHTML = this.config.itemsPerPageLabel + (this.config.showPageSizeOptions ? '' : this.size);
             // page size panel
             [this.labels.itemsPerPageLabel,
                 (this.config.showPageSizeOptions ? this.actions.selectPageSize : null)

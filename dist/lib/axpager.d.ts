@@ -1,6 +1,11 @@
 import { PageConfig } from "./config/page-config";
 import { RequestOption } from "./config/request-option";
 import { PageEvent } from "./config/page-event";
+/**
+ * create html element
+ * @param tagName tag name
+ * @param attributes attributes
+ */
 export declare const createElement: (tagName: string, attributes?: {
     [index: string]: any;
 }) => HTMLElement;

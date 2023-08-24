@@ -83,7 +83,7 @@ class XMLHttpRequestAdapter {
  * default page init config.
  */
 const defaultPageConfig = {
-    itemsPerPageLabel: '每页条数',
+    itemsPerPageLabel: '每页条数 ',
     firstPageLabel: '第一页',
     previousPageLabel: '上一页',
     nextPageLabel: '下一页',
@@ -92,6 +92,7 @@ const defaultPageConfig = {
     showFirstLastButtons: true,
     showPageSizeOptions: true,
     initPageNumber: 1,
+    initPageSize: 10,
     pageSizeOptions: [10, 15, 30],
     ajaxAdapter: new XMLHttpRequestAdapter(),
     getRangeLabel: (page, size, pages, length) => `第${page}/${pages}页，共${length}条`,
@@ -119,6 +120,11 @@ const icons = {
     forward: '<svg viewBox="0 0 24 24" focusable="false" class="axp-icon"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg>',
     fastForward: '<svg viewBox="0 0 24 24" focusable="false" class="axp-icon"><path d="M5.59 7.41L10.18 12l-4.59 4.59L7 18l6-6-6-6zM16 6h2v12h-2z"></path></svg>',
 };
+/**
+ * create html element
+ * @param tagName tag name
+ * @param attributes attributes
+ */
 const createElement = (tagName, attributes = {}) => {
     const e = document.createElement(tagName);
     Object.keys(attributes).forEach(a => {
@@ -149,7 +155,7 @@ class axpager {
         this.container = container;
         this.config = Object.assign({}, defaultPageConfig, config);
         this.currentPage = this.config.initPageNumber || 1;
-        this.size = this.config.pageSizeOptions[0] || 10;
+        this.size = this.config.pageSizeOptions.includes(this.config.initPageSize) ? this.config.initPageSize : (this.config.pageSizeOptions[0] || 10);
         this.actions = {
             selectPageSize: createElement('SELECT', {
                 className: 'axp-select axp-size-options',
@@ -425,8 +431,8 @@ class axpager {
      */
     [initDomElements]() {
         this.container.innerHTML = '<div class="ax-pager"></div>';
-        this.actions.selectPageSize.innerHTML = this.config.pageSizeOptions.map(num => `<option value="${num}">${num}</option>`).join('');
-        this.labels.itemsPerPageLabel.innerHTML = this.config.itemsPerPageLabel + (this.config.showPageSizeOptions ? '' : this.config.pageSizeOptions[0] || 10);
+        this.actions.selectPageSize.innerHTML = this.config.pageSizeOptions.map(num => `<option value="${num}" ${this.size === num ? 'selected' : ''}>${num}</option>`).join('');
+        this.labels.itemsPerPageLabel.innerHTML = this.config.itemsPerPageLabel + (this.config.showPageSizeOptions ? '' : this.size);
         // page size panel
         [this.labels.itemsPerPageLabel,
             (this.config.showPageSizeOptions ? this.actions.selectPageSize : null)
