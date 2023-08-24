@@ -49,8 +49,8 @@ getPagedResource: response => ({data: response.data, length: response.pager.reco
 const paginator = Paginator.init(document.getElementById('pager'), {
   getPagedResource: // adapt response data for ajax
 });
-// pager.ajax(url, requestOption)
-// pager.resource(array, requestOption)
+// paginator.ajax(url, requestOption)
+// paginator.resource(array, requestOption)
 paginator.of(url | array, {
     success: (list, event, req) => {
         // ...
