@@ -100,9 +100,7 @@ paginator.of([1,2,3,4,5,6,7,8,9], {
 });
 ```
 
-Above examples is default **PageConfig** and **RequestOption**. 
-
-Get more information from [PageConfig](#PageConfig) and [RequestOption](#RequestOption) .
+Above examples both are default [PageConfig](#PageConfig) and [RequestOption](#RequestOption). 
 
 Get into `dist/example/index.html` demo preview.
 
