@@ -78,6 +78,7 @@
     transform: translate(-50%, -50%);
     overflow: hidden;
     border-radius: inherit;
+    transition: background-color ease 0.2s;
 }
 
 .ax-pager > .axp-range-actions > .axp-ripple-btn:hover > .axp-btn-touch-target {
