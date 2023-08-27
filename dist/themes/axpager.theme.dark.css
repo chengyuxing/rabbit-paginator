@@ -21,7 +21,7 @@
     padding: 8px;
 }
 
-.ax-pager > .axp-page-size .axp-select {
+.ax-pager .axp-select {
     background-color: rgba(0, 0, 0, .15);
     color: currentColor;
     border-radius: 4px;
@@ -29,7 +29,7 @@
     min-width: 75px;
 }
 
-.ax-pager > .axp-page-size .axp-select > option {
+.ax-pager .axp-select > option {
     background-color: rgb(52, 52, 52);
     color: currentColor;
 }
@@ -42,6 +42,7 @@
 
 .ax-pager > .axp-range-actions > * {
     padding: 8px;
+    margin: 0 2px;
 }
 
 .ax-pager > .axp-range-actions > .axp-range {
@@ -100,17 +101,20 @@
     background-color: rgba(212, 212, 212, 0.31);
 }
 
+.ax-pager > .axp-range-actions > .axp-pages {
+    padding: 0;
+}
+
+.ax-pager > .axp-range-actions > .axp-pages > * {
+    margin: 0 2px;
+}
+
 .ax-pager > .axp-range-actions > .axp-pages > .axp-btn {
     font-size: 14px;
     color: currentColor;
 }
 
-.ax-pager > .axp-range-actions > .axp-pages {
-    padding: 0;
-}
-
 .ax-pager > .axp-range-actions > .axp-pages > .axp-btn[disabled] {
-    font-size: 14px;
     color: rgba(230, 230, 230, .39);
 }
 

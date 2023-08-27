@@ -19,6 +19,7 @@ const defaultPageConfig: PageConfig = {
     initPageNumber: 1,
     initPageSize: 10,
     pageRadius: 0,
+    pageNumbersType: 'button',
     pageSizeOptions: [10, 15, 30],
     ajaxAdapter: new XMLHttpRequestAdapter(),
     getRangeLabel: (page, size, pages, length) => `第${page}/${pages}页，共${length}条`,
@@ -88,7 +89,7 @@ export class axpager {
     private readonly panels!: {
         actionsPanel: HTMLDivElement;
         pageSizePanel: HTMLDivElement;
-        pagesPanel: HTMLDivElement;
+        pagesPanel: HTMLDivElement | HTMLSelectElement;
     };
     private pageNumberButtons: HTMLButtonElement[] = [];
     private previousPage: number = 1;
@@ -154,7 +155,12 @@ export class axpager {
         this.panels = {
             pageSizePanel: createElement('DIV', {className: 'axp-page-size'}) as HTMLDivElement,
             actionsPanel: createElement('DIV', {className: 'axp-range-actions'}) as HTMLDivElement,
-            pagesPanel: createElement('DIV', {className: 'axp-pages'}) as HTMLDivElement
+            pagesPanel: this.config.pageNumbersType === 'select' ?
+                createElement('SELECT', {
+                    className: 'axp-select axp-page-numbers',
+                    disabled: true
+                }) as HTMLSelectElement :
+                createElement('DIV', {className: 'axp-pages'}) as HTMLDivElement
         };
 
         this.panels.actionsPanel.addEventListener('click', e => {
@@ -189,10 +195,12 @@ export class axpager {
                     this.currentPage = this.pages;
                     break;
                 default:
-                    const idx = this.pageNumberButtons.indexOf(target);
-                    if (idx > -1) {
-                        this.currentPage = this.pageNumbers[idx];
-                        break;
+                    if (this.config.pageNumbersType !== 'select' && this.config.pageRadius > 1) {
+                        const idx = this.pageNumberButtons.indexOf(target);
+                        if (idx > -1) {
+                            this.currentPage = this.pageNumbers[idx];
+                            break;
+                        }
                     }
                     this.previousPage = tempPreviousPage;
                     matched = false;
@@ -213,7 +221,8 @@ export class axpager {
                 return;
             }
             this.previousPage = this.currentPage;
-            this.size = +select.value || 10;
+            const idx = select.options.selectedIndex;
+            this.size = this.config.pageSizeOptions[idx] || 10;
             const newPages = this.pages;
             if (this.currentPage > newPages) {
                 this.currentPage = newPages;
@@ -222,6 +231,22 @@ export class axpager {
             this.of(this.target, this.option);
         });
 
+        if (this.config.pageNumbersType === 'select' && this.config.pageRadius > 1) {
+            this.panels.pagesPanel.addEventListener('change', e => {
+                if (this.disabled) {
+                    return;
+                }
+                const select = e.target as HTMLSelectElement;
+                if (select.disabled) {
+                    return;
+                }
+                this.previousPage = this.currentPage;
+                const idx = select.options.selectedIndex;
+                this.currentPage = this.pageNumbers[idx];
+                this.config.changes(this.pageEvent, e.target);
+                this.of(this.target, this.option);
+            });
+        }
         this[initDomElements]();
     }
 
@@ -387,6 +412,13 @@ export class axpager {
         this.disabled = isDisable;
         if (this.disabled) {
             Object.values(this.actions).forEach(a => a.disabled = true);
+            if (this.config.pageRadius < 2) {
+                return;
+            }
+            if (this.config.pageNumbersType === 'select') {
+                (this.panels.pagesPanel as HTMLSelectElement).disabled = true;
+                return;
+            }
             this.pageNumberButtons.forEach(a => a.disabled = true);
             return;
         }
@@ -398,7 +430,7 @@ export class axpager {
      */
     [calcPageNumbers](): number[] {
         if (typeof this.config.pageRadius !== "number") {
-            throw Error('pages radius must be number.');
+            throw Error('pageRadius must be number.');
         }
         if (this.config.pageRadius < 2) {
             return [];
@@ -422,15 +454,22 @@ export class axpager {
     }
 
     /**
-     * update current page and page number buttons by length, avoid current page &gt; total pages occurs display empty result.
+     * update current page and page number buttons/select by length, avoid current page &gt; total pages occurs display empty result.
      * @param length result length
      */
     [updateCurrent](length: number) {
         this.length = length;
         const pageCount = this.pages;
         this.currentPage = this.currentPage > pageCount ? pageCount : this.currentPage;
+        if (this.config.pageRadius < 2) {
+            return;
+        }
         this.pageNumbers = this[calcPageNumbers]();
-        // update page number button elements
+        // update page number button/select elements
+        if (this.config.pageNumbersType === 'select') {
+            this.panels.pagesPanel.innerHTML = this.pageNumbers.map(num => `<option ${num === this.currentPage ? 'selected' : ''}>${num}</option>`).join('');
+            return;
+        }
         this.panels.pagesPanel.innerHTML = '';
         this.pageNumberButtons = this.pageNumbers.map(num => {
             const btn = createElement('BUTTON', {
@@ -448,7 +487,7 @@ export class axpager {
     [initDomElements]() {
         this.container.innerHTML = '<div class="ax-pager"></div>';
 
-        this.actions.selectPageSize.innerHTML = this.config.pageSizeOptions.map(num => `<option value="${num}" ${this.size === num ? 'selected' : ''}>${num}</option>`).join('');
+        this.actions.selectPageSize.innerHTML = this.config.pageSizeOptions.map(num => `<option ${this.size === num ? 'selected' : ''}>${num}</option>`).join('');
         this.labels.itemsPerPageLabel.innerHTML = this.config.itemsPerPageLabel + (this.config.showPageSizeOptions ? '' : this.size);
 
         // page size panel
@@ -509,6 +548,13 @@ export class axpager {
         this.actions.btnLast.disabled = disableNextLast;
         this.actions.btnLast.className = nextLastClz;
 
+        if (this.config.pageRadius < 2) {
+            return;
+        }
+        if (this.config.pageNumbersType === 'select') {
+            (this.panels.pagesPanel as HTMLSelectElement).disabled = this.disabled;
+            return;
+        }
         const pageNumberButtons = this.pageNumberButtons;
         const pageBtnCount = pageNumberButtons.length;
         if (pageBtnCount > 0) {

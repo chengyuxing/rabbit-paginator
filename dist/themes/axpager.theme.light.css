@@ -19,7 +19,7 @@
     padding: 8px;
 }
 
-.ax-pager > .axp-page-size .axp-select {
+.ax-pager .axp-select {
     border-radius: 4px;
     min-width: 75px;
 }
@@ -32,6 +32,7 @@
 
 .ax-pager > .axp-range-actions > * {
     padding: 8px;
+    margin: 0 2px;
 }
 
 .ax-pager > .axp-range-actions > .axp-range {
@@ -89,17 +90,21 @@
     background-color: rgba(37, 37, 37, 0.15);
 }
 
+.ax-pager > .axp-range-actions > .axp-pages {
+    padding: 0;
+}
+
+.ax-pager > .axp-range-actions > .axp-pages > * {
+    margin: 0 2px;
+}
+
 .ax-pager > .axp-range-actions > .axp-pages > .axp-btn {
     font-size: 14px;
     color: rgba(0, 0, 0, 0.67);
 }
 
-.ax-pager > .axp-range-actions > .axp-pages {
-    padding: 0;
-}
 
 .ax-pager > .axp-range-actions > .axp-pages > .axp-btn[disabled] {
-    font-size: 14px;
     color: rgba(0, 0, 0, .31);
 }
 
