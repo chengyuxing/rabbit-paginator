@@ -10,6 +10,11 @@ export interface PagedData {
 }
 
 /**
+ * page numbers container element type.
+ */
+export type PageNumbersType = 'button' | 'select';
+
+/**
  * paginator init config.
  */
 export interface PageConfig {
@@ -21,6 +26,7 @@ export interface PageConfig {
     initPageSize?: number;
     pageSizeOptions?: number[];
     pageRadius?: number;
+    pageNumbersType?: PageNumbersType;
     /**
      * range label content callback.
      * @param page current page
