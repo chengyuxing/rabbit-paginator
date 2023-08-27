@@ -20,6 +20,7 @@ export interface PageConfig {
     initPageNumber?: number;
     initPageSize?: number;
     pageSizeOptions?: number[];
+    pageRadius?: number;
     /**
      * range label content callback.
      * @param page current page

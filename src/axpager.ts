@@ -18,6 +18,7 @@ const defaultPageConfig: PageConfig = {
     showPageSizeOptions: true,
     initPageNumber: 1,
     initPageSize: 10,
+    pageRadius: 0,
     pageSizeOptions: [10, 15, 30],
     ajaxAdapter: new XMLHttpRequestAdapter(),
     getRangeLabel: (page, size, pages, length) => `第${page}/${pages}页，共${length}条`,
@@ -63,7 +64,8 @@ export const createElement = (tagName: string, attributes: { [index: string]: an
 const initDomElements = Symbol('initDomElements');
 const updateActionStatus = Symbol('updateActionStatus');
 const updateRangeLabel = Symbol('updateRangeLabel');
-const updateCurrentPage = Symbol('updateCurrentPage');
+const updateCurrent = Symbol('updateCurrentPage');
+const calcPageNumbers = Symbol('calcPageNumbers');
 
 /**
  * paginator support ajax request and static array data paging.
@@ -86,11 +88,14 @@ export class axpager {
     private readonly panels!: {
         actionsPanel: HTMLDivElement;
         pageSizePanel: HTMLDivElement;
+        pagesPanel: HTMLDivElement;
     };
+    private pageNumberButtons: HTMLButtonElement[] = [];
     private previousPage: number = 1;
     private currentPage: number = 1;
     private length: number = 0;
     private size: number = 0;
+    private pageNumbers: number[] = [];
     private option: RequestOption;
     private disabled = false;
 
@@ -148,7 +153,8 @@ export class axpager {
 
         this.panels = {
             pageSizePanel: createElement('DIV', {className: 'axp-page-size'}) as HTMLDivElement,
-            actionsPanel: createElement('DIV', {className: 'axp-range-actions'}) as HTMLDivElement
+            actionsPanel: createElement('DIV', {className: 'axp-range-actions'}) as HTMLDivElement,
+            pagesPanel: createElement('DIV', {className: 'axp-pages'}) as HTMLDivElement
         };
 
         this.panels.actionsPanel.addEventListener('click', e => {
@@ -183,6 +189,11 @@ export class axpager {
                     this.currentPage = this.pages;
                     break;
                 default:
+                    const idx = this.pageNumberButtons.indexOf(target);
+                    if (idx > -1) {
+                        this.currentPage = this.pageNumbers[idx];
+                        break;
+                    }
                     this.previousPage = tempPreviousPage;
                     matched = false;
                     break;
@@ -289,7 +300,7 @@ export class axpager {
         this.config.ajaxAdapter.request(this.target, this.pageParams, initOption)
             .then(response => {
                 const {data, length} = this.config.getPagedResource(response);
-                this[updateCurrentPage](length);
+                this[updateCurrent](length);
                 const pageEvent = this.pageEvent;
                 this.option.success(data, pageEvent, this.option.data);
                 this[updateActionStatus](pageEvent.page, pageEvent.pages, pageEvent.length);
@@ -314,7 +325,7 @@ export class axpager {
         this.option = Object.assign({}, defaultRequestOption, option);
         this.option.before(null);
         const filteredResource = this.target.filter(item => this.option.filter(item, this.option.data));
-        this[updateCurrentPage](filteredResource.length);
+        this[updateCurrent](filteredResource.length);
         const pageEvent = this.pageEvent;
         const pagedResource = filteredResource.slice(pageEvent.start, pageEvent.end);
         this.option.success(pagedResource, pageEvent, this.option.data);
@@ -376,19 +387,59 @@ export class axpager {
         this.disabled = isDisable;
         if (this.disabled) {
             Object.values(this.actions).forEach(a => a.disabled = true);
+            this.pageNumberButtons.forEach(a => a.disabled = true);
             return;
         }
         this[updateActionStatus](this.currentPage, this.pages, this.length);
     }
 
     /**
-     * update current page by length, avoid current page &gt; total pages occurs display empty result.
+     * calculate page numbers by radius.
+     */
+    [calcPageNumbers](): number[] {
+        if (typeof this.config.pageRadius !== "number") {
+            throw Error('pages radius must be number.');
+        }
+        if (this.config.pageRadius < 2) {
+            return [];
+        }
+        const pages = this.pages;
+        let start = this.currentPage - this.config.pageRadius;
+        let end = this.currentPage + this.config.pageRadius;
+        if (start <= 0) {
+            end = end - start + 1;
+        }
+        if (end > pages) {
+            start -= end - pages - 1;
+        }
+        const pageNums = [];
+        do {
+            if (start > 0 && start <= pages) {
+                pageNums.push(start);
+            }
+        } while (++start < end);
+        return pageNums;
+    }
+
+    /**
+     * update current page and page number buttons by length, avoid current page &gt; total pages occurs display empty result.
      * @param length result length
      */
-    [updateCurrentPage](length: number) {
+    [updateCurrent](length: number) {
         this.length = length;
         const pageCount = this.pages;
         this.currentPage = this.currentPage > pageCount ? pageCount : this.currentPage;
+        this.pageNumbers = this[calcPageNumbers]();
+        // update page number button elements
+        this.panels.pagesPanel.innerHTML = '';
+        this.pageNumberButtons = this.pageNumbers.map(num => {
+            const btn = createElement('BUTTON', {
+                className: `axp-btn axp-ripple-btn${num === this.currentPage ? ' axp-btn-current' : ''}`,
+                innerHTML: `${num}<span class="axp-btn-touch-target"></span>`
+            }) as HTMLButtonElement;
+            this.panels.pagesPanel.appendChild(btn);
+            return btn;
+        });
     }
 
     /**
@@ -410,6 +461,7 @@ export class axpager {
         [this.labels.rangeLabel,
             (this.config.showFirstLastButtons ? this.actions.btnFirst : null),
             this.actions.btnPrev,
+            (this.config.pageRadius > 1 ? this.panels.pagesPanel : null),
             this.actions.btnNext,
             (this.config.showFirstLastButtons ? this.actions.btnLast : null)
         ].filter(e => e !== null)
@@ -456,5 +508,26 @@ export class axpager {
         this.actions.btnNext.className = nextLastClz;
         this.actions.btnLast.disabled = disableNextLast;
         this.actions.btnLast.className = nextLastClz;
+
+        const pageNumberButtons = this.pageNumberButtons;
+        const pageBtnCount = pageNumberButtons.length;
+        if (pageBtnCount > 0) {
+            for (let i = 0; i < pageBtnCount; i++) {
+                if (i === 0) {
+                    (pageNumberButtons[i] as HTMLButtonElement).disabled = disableFirstPrev;
+                    continue;
+                }
+                if (i === pageBtnCount - 1) {
+                    (pageNumberButtons[i] as HTMLButtonElement).disabled = disableNextLast;
+                    continue;
+                }
+                // current page number button always disable.
+                if (i === this.pageNumbers.indexOf(page)) {
+                    (pageNumberButtons[i] as HTMLButtonElement).disabled = true;
+                    continue;
+                }
+                (pageNumberButtons[i] as HTMLButtonElement).disabled = this.disabled;
+            }
+        }
     }
 }
