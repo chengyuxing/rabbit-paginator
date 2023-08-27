@@ -19,7 +19,7 @@
     padding: 8px;
 }
 
-.ax-pager > .axp-page-size > .axp-select {
+.ax-pager > .axp-page-size .axp-select {
     border-radius: 4px;
     min-width: 75px;
 }
@@ -38,7 +38,7 @@
     margin: 0 15px;
 }
 
-.ax-pager > .axp-range-actions > .axp-btn {
+.ax-pager > .axp-range-actions .axp-btn {
     display: inline-block;
     position: relative;
     box-sizing: border-box;
@@ -55,21 +55,21 @@
     padding: 12px;
 }
 
-.ax-pager > .axp-range-actions > .axp-btn[disabled] {
+.ax-pager > .axp-range-actions .axp-btn[disabled] {
     pointer-events: none;
 }
 
-.ax-pager > .axp-range-actions > .axp-btn[disabled] > .axp-icon {
+.ax-pager > .axp-range-actions .axp-btn[disabled] > .axp-icon {
     fill: rgba(0, 0, 0, .12);
 }
 
-.ax-pager > .axp-range-actions > .axp-btn > .axp-icon {
+.ax-pager > .axp-range-actions .axp-btn > .axp-icon {
     fill: rgba(0, 0, 0, .54);
     width: 24px;
     height: 24px;
 }
 
-.ax-pager > .axp-range-actions > .axp-btn > .axp-btn-touch-target {
+.ax-pager > .axp-range-actions .axp-btn > .axp-btn-touch-target {
     position: absolute;
     top: 50%;
     height: 48px;
@@ -81,10 +81,28 @@
     transition: background-color ease 0.2s;
 }
 
-.ax-pager > .axp-range-actions > .axp-ripple-btn:hover > .axp-btn-touch-target {
+.ax-pager > .axp-range-actions .axp-ripple-btn:hover > .axp-btn-touch-target {
     background-color: rgba(37, 37, 37, 0.05);
 }
 
-.ax-pager > .axp-range-actions > .axp-ripple-btn:active > .axp-btn-touch-target {
+.ax-pager > .axp-range-actions .axp-ripple-btn:active > .axp-btn-touch-target {
     background-color: rgba(37, 37, 37, 0.15);
+}
+
+.ax-pager > .axp-range-actions > .axp-pages > .axp-btn {
+    font-size: 14px;
+    color: rgba(0, 0, 0, 0.67);
+}
+
+.ax-pager > .axp-range-actions > .axp-pages {
+    padding: 0;
+}
+
+.ax-pager > .axp-range-actions > .axp-pages > .axp-btn[disabled] {
+    font-size: 14px;
+    color: rgba(0, 0, 0, .31);
+}
+
+.ax-pager > .axp-range-actions > .axp-pages > .axp-btn-current {
+    background-color: rgba(37, 37, 37, 0.10);
 }
