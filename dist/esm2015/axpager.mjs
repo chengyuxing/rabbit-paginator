@@ -93,6 +93,8 @@ const defaultPageConfig = {
     showPageSizeOptions: true,
     initPageNumber: 1,
     initPageSize: 10,
+    pageRadius: 0,
+    pageNumbersType: 'button',
     pageSizeOptions: [10, 15, 30],
     ajaxAdapter: new XMLHttpRequestAdapter(),
     getRangeLabel: (page, size, pages, length) => `第${page}/${pages}页，共${length}条`,
@@ -135,7 +137,8 @@ const createElement = (tagName, attributes = {}) => {
 const initDomElements = Symbol('initDomElements');
 const updateActionStatus = Symbol('updateActionStatus');
 const updateRangeLabel = Symbol('updateRangeLabel');
-const updateCurrentPage = Symbol('updateCurrentPage');
+const updateCurrent = Symbol('updateCurrent');
+const calcPageNumbers = Symbol('calcPageNumbers');
 /**
  * paginator support ajax request and static array data paging.
  */
@@ -147,10 +150,12 @@ class axpager {
      */
     constructor(container, config) {
         this.config = {};
+        this.pageNumberButtons = [];
         this.previousPage = 1;
         this.currentPage = 1;
         this.length = 0;
         this.size = 0;
+        this.pageNumbers = [];
         this.disabled = false;
         this.container = container;
         this.config = Object.assign({}, defaultPageConfig, config);
@@ -198,7 +203,13 @@ class axpager {
         };
         this.panels = {
             pageSizePanel: createElement('DIV', { className: 'axp-page-size' }),
-            actionsPanel: createElement('DIV', { className: 'axp-range-actions' })
+            actionsPanel: createElement('DIV', { className: 'axp-range-actions' }),
+            pagesPanel: this.config.pageNumbersType === 'select' ?
+                createElement('SELECT', {
+                    className: 'axp-select axp-page-numbers',
+                    disabled: true
+                }) :
+                createElement('DIV', { className: 'axp-pages' })
         };
         this.panels.actionsPanel.addEventListener('click', e => {
             if (this.disabled) {
@@ -215,6 +226,7 @@ class axpager {
             }
             const actions = this.actions;
             let matched = true;
+            const tempPreviousPage = this.previousPage;
             this.previousPage = this.currentPage;
             switch (target) {
                 case actions.btnFirst:
@@ -232,6 +244,14 @@ class axpager {
                     this.currentPage = this.pages;
                     break;
                 default:
+                    if (this.config.pageNumbersType !== 'select' && this.config.pageRadius > 1) {
+                        const idx = this.pageNumberButtons.indexOf(target);
+                        if (idx > -1) {
+                            this.currentPage = this.pageNumbers[idx];
+                            break;
+                        }
+                    }
+                    this.previousPage = tempPreviousPage;
                     matched = false;
                     break;
             }
@@ -249,7 +269,8 @@ class axpager {
                 return;
             }
             this.previousPage = this.currentPage;
-            this.size = +select.value || 10;
+            const idx = select.options.selectedIndex;
+            this.size = this.config.pageSizeOptions[idx] || 10;
             const newPages = this.pages;
             if (this.currentPage > newPages) {
                 this.currentPage = newPages;
@@ -257,6 +278,22 @@ class axpager {
             this.config.changes(this.pageEvent, e.target);
             this.of(this.target, this.option);
         });
+        if (this.config.pageNumbersType === 'select' && this.config.pageRadius > 1) {
+            this.panels.pagesPanel.addEventListener('change', e => {
+                if (this.disabled) {
+                    return;
+                }
+                const select = e.target;
+                if (select.disabled) {
+                    return;
+                }
+                this.previousPage = this.currentPage;
+                const idx = select.options.selectedIndex;
+                this.currentPage = this.pageNumbers[idx];
+                this.config.changes(this.pageEvent, e.target);
+                this.of(this.target, this.option);
+            });
+        }
         this[initDomElements]();
     }
     /**
@@ -330,7 +367,7 @@ class axpager {
         this.config.ajaxAdapter.request(this.target, this.pageParams, initOption)
             .then(response => {
             const { data, length } = this.config.getPagedResource(response);
-            this[updateCurrentPage](length);
+            this[updateCurrent](length);
             const pageEvent = this.pageEvent;
             this.option.success(data, pageEvent, this.option.data);
             this[updateActionStatus](pageEvent.page, pageEvent.pages, pageEvent.length);
@@ -354,7 +391,7 @@ class axpager {
         this.option = Object.assign({}, defaultRequestOption, option);
         this.option.before(null);
         const filteredResource = this.target.filter(item => this.option.filter(item, this.option.data));
-        this[updateCurrentPage](filteredResource.length);
+        this[updateCurrent](filteredResource.length);
         const pageEvent = this.pageEvent;
         const pagedResource = filteredResource.slice(pageEvent.start, pageEvent.end);
         this.option.success(pagedResource, pageEvent, this.option.data);
@@ -413,25 +450,78 @@ class axpager {
         this.disabled = isDisable;
         if (this.disabled) {
             Object.values(this.actions).forEach(a => a.disabled = true);
+            if (this.config.pageRadius < 2) {
+                return;
+            }
+            if (this.config.pageNumbersType === 'select') {
+                this.panels.pagesPanel.disabled = true;
+                return;
+            }
+            this.pageNumberButtons.forEach(a => a.disabled = true);
             return;
         }
         this[updateActionStatus](this.currentPage, this.pages, this.length);
     }
     /**
-     * update current page by length, avoid current page &gt; total pages occurs display empty result.
+     * calculate page numbers by radius.
+     */
+    [calcPageNumbers]() {
+        if (typeof this.config.pageRadius !== "number") {
+            throw Error('pageRadius must be number.');
+        }
+        if (this.config.pageRadius < 2) {
+            return [];
+        }
+        const pages = this.pages;
+        let start = this.currentPage - this.config.pageRadius;
+        let end = this.currentPage + this.config.pageRadius;
+        if (start <= 0) {
+            end = end - start + 1;
+        }
+        if (end > pages) {
+            start -= end - pages - 1;
+        }
+        const pageNums = [];
+        do {
+            if (start > 0 && start <= pages) {
+                pageNums.push(start);
+            }
+        } while (++start < end);
+        return pageNums;
+    }
+    /**
+     * update current page and page number buttons/select by length, avoid current page &gt; total pages occurs display empty result.
      * @param length result length
      */
-    [updateCurrentPage](length) {
+    [updateCurrent](length) {
         this.length = length;
         const pageCount = this.pages;
         this.currentPage = this.currentPage > pageCount ? pageCount : this.currentPage;
+        if (this.config.pageRadius < 2) {
+            return;
+        }
+        this.pageNumbers = this[calcPageNumbers]();
+        // update page number button/select elements
+        if (this.config.pageNumbersType === 'select') {
+            this.panels.pagesPanel.innerHTML = this.pageNumbers.map(num => `<option ${num === this.currentPage ? 'selected' : ''}>${num}</option>`).join('');
+            return;
+        }
+        this.panels.pagesPanel.innerHTML = '';
+        this.pageNumberButtons = this.pageNumbers.map(num => {
+            const btn = createElement('BUTTON', {
+                className: `axp-btn axp-ripple-btn${num === this.currentPage ? ' axp-btn-current' : ''}`,
+                innerHTML: `${num}<span class="axp-btn-touch-target"></span>`
+            });
+            this.panels.pagesPanel.appendChild(btn);
+            return btn;
+        });
     }
     /**
      * init pager dom elements by config.
      */
     [initDomElements]() {
         this.container.innerHTML = '<div class="ax-pager"></div>';
-        this.actions.selectPageSize.innerHTML = this.config.pageSizeOptions.map(num => `<option value="${num}" ${this.size === num ? 'selected' : ''}>${num}</option>`).join('');
+        this.actions.selectPageSize.innerHTML = this.config.pageSizeOptions.map(num => `<option ${this.size === num ? 'selected' : ''}>${num}</option>`).join('');
         this.labels.itemsPerPageLabel.innerHTML = this.config.itemsPerPageLabel + (this.config.showPageSizeOptions ? '' : this.size);
         // page size panel
         [this.labels.itemsPerPageLabel,
@@ -442,6 +532,7 @@ class axpager {
         [this.labels.rangeLabel,
             (this.config.showFirstLastButtons ? this.actions.btnFirst : null),
             this.actions.btnPrev,
+            (this.config.pageRadius > 1 ? this.panels.pagesPanel : null),
             this.actions.btnNext,
             (this.config.showFirstLastButtons ? this.actions.btnLast : null)
         ].filter(e => e !== null)
@@ -481,6 +572,33 @@ class axpager {
         this.actions.btnNext.className = nextLastClz;
         this.actions.btnLast.disabled = disableNextLast;
         this.actions.btnLast.className = nextLastClz;
+        if (this.config.pageRadius < 2) {
+            return;
+        }
+        if (this.config.pageNumbersType === 'select') {
+            this.panels.pagesPanel.disabled = this.disabled;
+            return;
+        }
+        const pageNumberButtons = this.pageNumberButtons;
+        const pageBtnCount = pageNumberButtons.length;
+        if (pageBtnCount > 0) {
+            for (let i = 0; i < pageBtnCount; i++) {
+                if (i === 0) {
+                    pageNumberButtons[i].disabled = disableFirstPrev;
+                    continue;
+                }
+                if (i === pageBtnCount - 1) {
+                    pageNumberButtons[i].disabled = disableNextLast;
+                    continue;
+                }
+                // current page number button always disable.
+                if (i === this.pageNumbers.indexOf(page)) {
+                    pageNumberButtons[i].disabled = true;
+                    continue;
+                }
+                pageNumberButtons[i].disabled = this.disabled;
+            }
+        }
     }
 }
 

@@ -12,7 +12,8 @@ export declare const createElement: (tagName: string, attributes?: {
 declare const initDomElements: unique symbol;
 declare const updateActionStatus: unique symbol;
 declare const updateRangeLabel: unique symbol;
-declare const updateCurrentPage: unique symbol;
+declare const updateCurrent: unique symbol;
+declare const calcPageNumbers: unique symbol;
 /**
  * paginator support ajax request and static array data paging.
  */
@@ -23,10 +24,12 @@ export declare class axpager {
     private readonly actions;
     private readonly labels;
     private readonly panels;
+    private pageNumberButtons;
     private previousPage;
     private currentPage;
     private length;
     private size;
+    private pageNumbers;
     private option;
     private disabled;
     /**
@@ -87,10 +90,14 @@ export declare class axpager {
      */
     disable(isDisable: boolean): void;
     /**
-     * update current page by length, avoid current page &gt; total pages occurs display empty result.
+     * calculate page numbers by radius.
+     */
+    [calcPageNumbers](): number[];
+    /**
+     * update current page and page number buttons/select by length, avoid current page &gt; total pages occurs display empty result.
      * @param length result length
      */
-    [updateCurrentPage](length: number): void;
+    [updateCurrent](length: number): void;
     /**
      * init pager dom elements by config.
      */

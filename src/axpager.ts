@@ -65,7 +65,7 @@ export const createElement = (tagName: string, attributes: { [index: string]: an
 const initDomElements = Symbol('initDomElements');
 const updateActionStatus = Symbol('updateActionStatus');
 const updateRangeLabel = Symbol('updateRangeLabel');
-const updateCurrent = Symbol('updateCurrentPage');
+const updateCurrent = Symbol('updateCurrent');
 const calcPageNumbers = Symbol('calcPageNumbers');
 
 /**
