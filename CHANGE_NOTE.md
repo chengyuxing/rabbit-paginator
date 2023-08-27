@@ -1,5 +1,16 @@
 # change note
 
+## 1.1.2
+
+- New property: PageConfig#pageRadius.
+- New property: PageConfig#pageNumbersType.
+- Support show page numbers action element if `PageConfig#pageRadius > 1` .
+- Support button and select element of page numbers.
+- Update PageEvent#previousPage of actions optimized.
+- Update themes.
+- Update example.
+- Some optimized.
+
 ## 1.1.1
 
 - New Property: PageConfig#initPageSize.

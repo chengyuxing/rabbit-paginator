@@ -184,6 +184,36 @@ Get into `dist/example/index.html` demo preview.
 
   Page size options, default `[10, 15, 30]` .
 
+- **pageRadius** `optional`
+
+  Half of page numbers length, default `0` .
+
+  ```typescript
+  // current page: 5
+  // 2
+  [3, 4, 5, 6]
+  // 3
+  [2, 3, 4, 5, 6, 7]
+  ```
+
+- **pageNumbersType** `optional`
+
+  Page numbers element type, default `button` , support `select` , working when `pageRadius > 1` .
+
+  ```typescript
+  // pageRadius: 2
+  
+  // select example:
+  // |< < [ ] > >|
+  //      [3]
+  //      [4]
+  //      [5]
+  //      [6]
+  
+  // button example:
+  // |< < (3) (4) (5) (6) > >|
+  ```
+
 - **firstPageLabel** `optional`
 
   First page button title text, default `第一页` .
@@ -256,9 +286,9 @@ Get into `dist/example/index.html` demo preview.
 
     `{}` -> `form-urlencode` (default)
 
-    `{}` -> `json` (ContentType: `application/json`)
+    `{}` -> `json` (`Content-Type` : `application/json`)
 
-    `{}` -> `FormData` (ContentType: `multipart/form-data`)
+    `{}` -> `FormData` (`Content-Type` : `multipart/form-data`)
 
     `FormData` -> `FormData`
 
