@@ -1,5 +1,10 @@
 # change note
 
+## 1.2.1
+
+- Fixed bug when PageConfig#initPageNumber < 1.
+- Improved paging action to make them more secure.
+
 ## 1.2.0
 
 - Fixed page number buttons type default `submit`, changed to `button` .
