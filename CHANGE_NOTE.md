@@ -1,5 +1,10 @@
 # change note
 
+## 1.2.0
+
+- Fixed page number buttons type default `submit`, changed to `button` .
+- Version 1.2.0 released.
+
 ## 1.1.3
 
 - Remove unnecessary css class `axp-ripple-btn` .
