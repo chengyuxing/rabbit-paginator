@@ -410,18 +410,6 @@ export class axpager {
      */
     disable(isDisable: boolean) {
         this.disabled = isDisable;
-        if (this.disabled) {
-            Object.values(this.actions).forEach(a => a.disabled = true);
-            if (this.config.pageRadius < 2) {
-                return;
-            }
-            if (this.config.pageNumbersType === 'select') {
-                (this.panels.pagesPanel as HTMLSelectElement).disabled = true;
-                return;
-            }
-            this.pageNumberButtons.forEach(a => a.disabled = true);
-            return;
-        }
         this[updateActionStatus](this.currentPage, this.pages, this.length);
     }
 
@@ -528,8 +516,18 @@ export class axpager {
      */
     [updateActionStatus](page: number, pages: number, length: number) {
         if (this.disabled) {
+            Object.values(this.actions).forEach(a => a.disabled = true);
+            if (this.config.pageRadius < 2) {
+                return;
+            }
+            if (this.config.pageNumbersType === 'select') {
+                (this.panels.pagesPanel as HTMLSelectElement).disabled = true;
+                return;
+            }
+            this.pageNumberButtons.forEach(a => a.disabled = true);
             return;
         }
+
         const disableFirstPrev = page <= 1;
         const disableNextLast = pages <= 1 || page === pages;
 
@@ -543,7 +541,7 @@ export class axpager {
             return;
         }
         if (this.config.pageNumbersType === 'select') {
-            (this.panels.pagesPanel as HTMLSelectElement).disabled = this.disabled;
+            (this.panels.pagesPanel as HTMLSelectElement).disabled = false;
             return;
         }
         const pageNumberButtons = this.pageNumberButtons;
@@ -563,7 +561,7 @@ export class axpager {
                     (pageNumberButtons[i] as HTMLButtonElement).disabled = true;
                     continue;
                 }
-                (pageNumberButtons[i] as HTMLButtonElement).disabled = this.disabled;
+                (pageNumberButtons[i] as HTMLButtonElement).disabled = false;
             }
         }
     }
