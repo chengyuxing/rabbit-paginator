@@ -168,7 +168,7 @@ export class axpager {
                 return;
             }
             let target = e.target as HTMLButtonElement;
-            if (target.className === 'axp-btn-touch-target') {
+            if (target.classList.contains('axp-btn-touch-target')) {
                 target = target.parentElement as HTMLButtonElement;
             }
             if (target == null || target.disabled) {
