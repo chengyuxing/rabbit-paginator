@@ -171,7 +171,7 @@
             this.disabled = false;
             this.container = container;
             this.config = Object.assign({}, defaultPageConfig, config);
-            this.currentPage = this.config.initPageNumber || 1;
+            this.currentPage = typeof this.config.initPageNumber !== 'number' || this.config.initPageNumber < 1 ? 1 : this.config.initPageNumber;
             this.size = this.config.pageSizeOptions.includes(this.config.initPageSize) ? this.config.initPageSize : (this.config.pageSizeOptions[0] || 10);
             this.actions = {
                 selectPageSize: createElement('SELECT', {
@@ -228,46 +228,67 @@
                     return;
                 }
                 var target = e.target;
-                if (target == null)
-                    return;
-                if (target.className === 'axp-btn-touch-target') {
+                if (target.classList.contains('axp-btn-touch-target')) {
                     target = target.parentElement;
                 }
                 if (target == null || target.disabled) {
                     return;
                 }
                 var actions = _this.actions;
-                var matched = true;
-                var tempPreviousPage = _this.previousPage;
-                _this.previousPage = _this.currentPage;
+                var allow = true;
                 switch (target) {
                     case actions.btnFirst:
+                        if (_this.currentPage === 1) {
+                            allow = false;
+                            break;
+                        }
+                        _this.previousPage = _this.currentPage;
                         _this.currentPage = 1;
                         break;
                     case actions.btnPrev:
+                        if (_this.currentPage === 1) {
+                            allow = false;
+                            break;
+                        }
+                        _this.previousPage = _this.currentPage;
                         _this.currentPage = _this.currentPage > 1 ? _this.currentPage - 1 : 1;
                         break;
                     case actions.btnNext:
-                        var next = _this.currentPage + 1;
                         var pageCount = _this.pages;
+                        if (_this.currentPage === pageCount) {
+                            allow = false;
+                            break;
+                        }
+                        _this.previousPage = _this.currentPage;
+                        var next = _this.currentPage + 1;
                         _this.currentPage = next > pageCount ? pageCount : next;
                         break;
                     case actions.btnLast:
-                        _this.currentPage = _this.pages;
+                        var totalPages = _this.pages;
+                        if (_this.currentPage === totalPages) {
+                            allow = false;
+                            break;
+                        }
+                        _this.previousPage = _this.currentPage;
+                        _this.currentPage = totalPages;
                         break;
                     default:
                         if (_this.config.pageNumbersType !== 'select' && _this.config.pageRadius > 1) {
                             var idx = _this.pageNumberButtons.indexOf(target);
                             if (idx > -1) {
+                                if (_this.currentPage === _this.pageNumbers[idx]) {
+                                    allow = false;
+                                    break;
+                                }
+                                _this.previousPage = _this.currentPage;
                                 _this.currentPage = _this.pageNumbers[idx];
                                 break;
                             }
                         }
-                        _this.previousPage = tempPreviousPage;
-                        matched = false;
+                        allow = false;
                         break;
                 }
-                if (matched) {
+                if (allow) {
                     _this.config.changes(_this.pageEvent, target);
                     _this.of(_this.target, _this.option);
                 }
