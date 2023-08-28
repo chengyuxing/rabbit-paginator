@@ -474,18 +474,6 @@
          */
         axpager.prototype.disable = function (isDisable) {
             this.disabled = isDisable;
-            if (this.disabled) {
-                Object.values(this.actions).forEach(function (a) { return a.disabled = true; });
-                if (this.config.pageRadius < 2) {
-                    return;
-                }
-                if (this.config.pageNumbersType === 'select') {
-                    this.panels.pagesPanel.disabled = true;
-                    return;
-                }
-                this.pageNumberButtons.forEach(function (a) { return a.disabled = true; });
-                return;
-            }
             this[updateActionStatus](this.currentPage, this.pages, this.length);
         };
         /**
@@ -502,7 +490,7 @@
             var start = this.currentPage - this.config.pageRadius;
             var end = this.currentPage + this.config.pageRadius;
             if (start <= 0) {
-                end = end - start + 1;
+                end -= start - 1;
             }
             if (end > pages) {
                 start -= end - pages - 1;
@@ -536,7 +524,7 @@
             this.panels.pagesPanel.innerHTML = '';
             this.pageNumberButtons = this.pageNumbers.map(function (num) {
                 var btn = createElement('BUTTON', {
-                    className: "axp-btn axp-ripple-btn".concat(num === _this.currentPage ? ' axp-btn-current' : ''),
+                    className: "axp-btn".concat(num === _this.currentPage ? ' axp-btn-current' : ''),
                     innerHTML: "".concat(num, "<span class=\"axp-btn-touch-target\"></span>")
                 });
                 _this.panels.pagesPanel.appendChild(btn);
@@ -585,47 +573,48 @@
          */
         axpager.prototype[updateActionStatus] = function (page, pages, length) {
             if (this.disabled) {
+                Object.values(this.actions).forEach(function (a) { return a.disabled = true; });
+                if (this.config.pageRadius < 2) {
+                    return;
+                }
+                if (this.config.pageNumbersType === 'select') {
+                    this.panels.pagesPanel.disabled = true;
+                    return;
+                }
+                this.pageNumberButtons.forEach(function (a) { return a.disabled = true; });
                 return;
             }
             var disableFirstPrev = page <= 1;
             var disableNextLast = pages <= 1 || page === pages;
-            var firstPrevClz = "axp-btn".concat(disableFirstPrev ? '' : ' axp-ripple-btn');
-            var nextLastClz = "axp-btn".concat(disableNextLast ? '' : ' axp-ripple-btn');
             this.actions.selectPageSize.disabled = length <= 0;
             this.actions.btnFirst.disabled = disableFirstPrev;
-            this.actions.btnFirst.className = firstPrevClz;
             this.actions.btnPrev.disabled = disableFirstPrev;
-            this.actions.btnPrev.className = firstPrevClz;
             this.actions.btnNext.disabled = disableNextLast;
-            this.actions.btnNext.className = nextLastClz;
             this.actions.btnLast.disabled = disableNextLast;
-            this.actions.btnLast.className = nextLastClz;
             if (this.config.pageRadius < 2) {
                 return;
             }
             if (this.config.pageNumbersType === 'select') {
-                this.panels.pagesPanel.disabled = this.disabled;
+                this.panels.pagesPanel.disabled = false;
                 return;
             }
             var pageNumberButtons = this.pageNumberButtons;
             var pageBtnCount = pageNumberButtons.length;
-            if (pageBtnCount > 0) {
-                for (var i = 0; i < pageBtnCount; i++) {
-                    if (i === 0) {
-                        pageNumberButtons[i].disabled = disableFirstPrev;
-                        continue;
-                    }
-                    if (i === pageBtnCount - 1) {
-                        pageNumberButtons[i].disabled = disableNextLast;
-                        continue;
-                    }
-                    // current page number button always disable.
-                    if (i === this.pageNumbers.indexOf(page)) {
-                        pageNumberButtons[i].disabled = true;
-                        continue;
-                    }
-                    pageNumberButtons[i].disabled = this.disabled;
+            for (var i = 0; i < pageBtnCount; i++) {
+                if (i === 0) {
+                    pageNumberButtons[i].disabled = disableFirstPrev;
+                    continue;
                 }
+                if (i === pageBtnCount - 1) {
+                    pageNumberButtons[i].disabled = disableNextLast;
+                    continue;
+                }
+                // current page number button always disable.
+                if (i === this.pageNumbers.indexOf(page)) {
+                    pageNumberButtons[i].disabled = true;
+                    continue;
+                }
+                pageNumberButtons[i].disabled = false;
             }
         };
         return axpager;

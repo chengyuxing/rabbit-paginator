@@ -448,18 +448,6 @@ class axpager {
      */
     disable(isDisable) {
         this.disabled = isDisable;
-        if (this.disabled) {
-            Object.values(this.actions).forEach(a => a.disabled = true);
-            if (this.config.pageRadius < 2) {
-                return;
-            }
-            if (this.config.pageNumbersType === 'select') {
-                this.panels.pagesPanel.disabled = true;
-                return;
-            }
-            this.pageNumberButtons.forEach(a => a.disabled = true);
-            return;
-        }
         this[updateActionStatus](this.currentPage, this.pages, this.length);
     }
     /**
@@ -476,7 +464,7 @@ class axpager {
         let start = this.currentPage - this.config.pageRadius;
         let end = this.currentPage + this.config.pageRadius;
         if (start <= 0) {
-            end = end - start + 1;
+            end -= start - 1;
         }
         if (end > pages) {
             start -= end - pages - 1;
@@ -509,7 +497,7 @@ class axpager {
         this.panels.pagesPanel.innerHTML = '';
         this.pageNumberButtons = this.pageNumbers.map(num => {
             const btn = createElement('BUTTON', {
-                className: `axp-btn axp-ripple-btn${num === this.currentPage ? ' axp-btn-current' : ''}`,
+                className: `axp-btn${num === this.currentPage ? ' axp-btn-current' : ''}`,
                 innerHTML: `${num}<span class="axp-btn-touch-target"></span>`
             });
             this.panels.pagesPanel.appendChild(btn);
@@ -557,47 +545,48 @@ class axpager {
      */
     [updateActionStatus](page, pages, length) {
         if (this.disabled) {
+            Object.values(this.actions).forEach(a => a.disabled = true);
+            if (this.config.pageRadius < 2) {
+                return;
+            }
+            if (this.config.pageNumbersType === 'select') {
+                this.panels.pagesPanel.disabled = true;
+                return;
+            }
+            this.pageNumberButtons.forEach(a => a.disabled = true);
             return;
         }
         const disableFirstPrev = page <= 1;
         const disableNextLast = pages <= 1 || page === pages;
-        const firstPrevClz = `axp-btn${disableFirstPrev ? '' : ' axp-ripple-btn'}`;
-        const nextLastClz = `axp-btn${disableNextLast ? '' : ' axp-ripple-btn'}`;
         this.actions.selectPageSize.disabled = length <= 0;
         this.actions.btnFirst.disabled = disableFirstPrev;
-        this.actions.btnFirst.className = firstPrevClz;
         this.actions.btnPrev.disabled = disableFirstPrev;
-        this.actions.btnPrev.className = firstPrevClz;
         this.actions.btnNext.disabled = disableNextLast;
-        this.actions.btnNext.className = nextLastClz;
         this.actions.btnLast.disabled = disableNextLast;
-        this.actions.btnLast.className = nextLastClz;
         if (this.config.pageRadius < 2) {
             return;
         }
         if (this.config.pageNumbersType === 'select') {
-            this.panels.pagesPanel.disabled = this.disabled;
+            this.panels.pagesPanel.disabled = false;
             return;
         }
         const pageNumberButtons = this.pageNumberButtons;
         const pageBtnCount = pageNumberButtons.length;
-        if (pageBtnCount > 0) {
-            for (let i = 0; i < pageBtnCount; i++) {
-                if (i === 0) {
-                    pageNumberButtons[i].disabled = disableFirstPrev;
-                    continue;
-                }
-                if (i === pageBtnCount - 1) {
-                    pageNumberButtons[i].disabled = disableNextLast;
-                    continue;
-                }
-                // current page number button always disable.
-                if (i === this.pageNumbers.indexOf(page)) {
-                    pageNumberButtons[i].disabled = true;
-                    continue;
-                }
-                pageNumberButtons[i].disabled = this.disabled;
+        for (let i = 0; i < pageBtnCount; i++) {
+            if (i === 0) {
+                pageNumberButtons[i].disabled = disableFirstPrev;
+                continue;
             }
+            if (i === pageBtnCount - 1) {
+                pageNumberButtons[i].disabled = disableNextLast;
+                continue;
+            }
+            // current page number button always disable.
+            if (i === this.pageNumbers.indexOf(page)) {
+                pageNumberButtons[i].disabled = true;
+                continue;
+            }
+            pageNumberButtons[i].disabled = false;
         }
     }
 }
