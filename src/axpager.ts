@@ -427,7 +427,7 @@ export class axpager {
         let start = this.currentPage - this.config.pageRadius;
         let end = this.currentPage + this.config.pageRadius;
         if (start <= 0) {
-            end = end - start + 1;
+            end -= start - 1;
         }
         if (end > pages) {
             start -= end - pages - 1;
@@ -546,23 +546,21 @@ export class axpager {
         }
         const pageNumberButtons = this.pageNumberButtons;
         const pageBtnCount = pageNumberButtons.length;
-        if (pageBtnCount > 0) {
-            for (let i = 0; i < pageBtnCount; i++) {
-                if (i === 0) {
-                    (pageNumberButtons[i] as HTMLButtonElement).disabled = disableFirstPrev;
-                    continue;
-                }
-                if (i === pageBtnCount - 1) {
-                    (pageNumberButtons[i] as HTMLButtonElement).disabled = disableNextLast;
-                    continue;
-                }
-                // current page number button always disable.
-                if (i === this.pageNumbers.indexOf(page)) {
-                    (pageNumberButtons[i] as HTMLButtonElement).disabled = true;
-                    continue;
-                }
-                (pageNumberButtons[i] as HTMLButtonElement).disabled = false;
+        for (let i = 0; i < pageBtnCount; i++) {
+            if (i === 0) {
+                (pageNumberButtons[i] as HTMLButtonElement).disabled = disableFirstPrev;
+                continue;
             }
+            if (i === pageBtnCount - 1) {
+                (pageNumberButtons[i] as HTMLButtonElement).disabled = disableNextLast;
+                continue;
+            }
+            // current page number button always disable.
+            if (i === this.pageNumbers.indexOf(page)) {
+                (pageNumberButtons[i] as HTMLButtonElement).disabled = true;
+                continue;
+            }
+            (pageNumberButtons[i] as HTMLButtonElement).disabled = false;
         }
     }
 }
