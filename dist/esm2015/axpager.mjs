@@ -497,6 +497,7 @@ class axpager {
         this.panels.pagesPanel.innerHTML = '';
         this.pageNumberButtons = this.pageNumbers.map(num => {
             const btn = createElement('BUTTON', {
+                type: 'button',
                 className: `axp-btn${num === this.currentPage ? ' axp-btn-current' : ''}`,
                 innerHTML: `${num}<span class="axp-btn-touch-target"></span>`
             });

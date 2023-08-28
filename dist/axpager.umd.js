@@ -524,6 +524,7 @@
             this.panels.pagesPanel.innerHTML = '';
             this.pageNumberButtons = this.pageNumbers.map(function (num) {
                 var btn = createElement('BUTTON', {
+                    type: 'button',
                     className: "axp-btn".concat(num === _this.currentPage ? ' axp-btn-current' : ''),
                     innerHTML: "".concat(num, "<span class=\"axp-btn-touch-target\"></span>")
                 });
