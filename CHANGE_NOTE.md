@@ -1,5 +1,10 @@
 # change note
 
+## 1.1.3
+
+- Remove unnecessary css class `axp-ripple-btn` .
+- Instance method disable(boolean) optimized.
+
 ## 1.1.2
 
 - New property: PageConfig#pageRadius.
