@@ -108,7 +108,7 @@ export class axpager {
     constructor(container: HTMLElement, config?: PageConfig) {
         this.container = container;
         this.config = Object.assign({}, defaultPageConfig, config);
-        this.currentPage = this.config.initPageNumber || 1;
+        this.currentPage = typeof this.config.initPageNumber !== 'number' || this.config.initPageNumber < 1 ? 1 : this.config.initPageNumber;
         this.size = this.config.pageSizeOptions.includes(this.config.initPageSize) ? this.config.initPageSize : (this.config.pageSizeOptions[0] || 10);
         this.actions = {
             selectPageSize: createElement('SELECT', {
