@@ -168,7 +168,6 @@ export class axpager {
                 return;
             }
             let target = e.target as HTMLButtonElement;
-            if (target == null) return;
             if (target.className === 'axp-btn-touch-target') {
                 target = target.parentElement as HTMLButtonElement;
             }
@@ -176,37 +175,60 @@ export class axpager {
                 return;
             }
             const actions = this.actions;
-            let matched = true;
-            const tempPreviousPage = this.previousPage;
-            this.previousPage = this.currentPage;
+            let allow = true;
             switch (target) {
                 case actions.btnFirst:
+                    if (this.currentPage === 1) {
+                        allow = false;
+                        break;
+                    }
+                    this.previousPage = this.currentPage;
                     this.currentPage = 1;
                     break;
                 case actions.btnPrev:
+                    if (this.currentPage === 1) {
+                        allow = false;
+                        break;
+                    }
+                    this.previousPage = this.currentPage;
                     this.currentPage = this.currentPage > 1 ? this.currentPage - 1 : 1;
                     break;
                 case actions.btnNext:
-                    const next = this.currentPage + 1;
                     const pageCount = this.pages;
+                    if (this.currentPage === pageCount) {
+                        allow = false;
+                        break;
+                    }
+                    this.previousPage = this.currentPage;
+                    const next = this.currentPage + 1;
                     this.currentPage = next > pageCount ? pageCount : next;
                     break;
                 case actions.btnLast:
-                    this.currentPage = this.pages;
+                    const totalPages = this.pages;
+                    if (this.currentPage === totalPages) {
+                        allow = false;
+                        break;
+                    }
+                    this.previousPage = this.currentPage;
+                    this.currentPage = totalPages;
                     break;
                 default:
                     if (this.config.pageNumbersType !== 'select' && this.config.pageRadius > 1) {
                         const idx = this.pageNumberButtons.indexOf(target);
                         if (idx > -1) {
+                            if (this.currentPage === this.pageNumbers[idx]) {
+                                allow = false;
+                                break;
+                            }
+                            this.previousPage = this.currentPage;
                             this.currentPage = this.pageNumbers[idx];
                             break;
                         }
                     }
-                    this.previousPage = tempPreviousPage;
-                    matched = false;
+                    allow = false;
                     break;
             }
-            if (matched) {
+            if (allow) {
                 this.config.changes(this.pageEvent, target);
                 this.of(this.target, this.option);
             }
