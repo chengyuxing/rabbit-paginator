@@ -71,14 +71,14 @@
     pointer-events: none;
 }
 
-.ax-pager > .axp-range-actions .axp-btn[disabled] > .axp-icon {
-    fill: rgba(230, 230, 230, .45);
-}
-
 .ax-pager > .axp-range-actions .axp-btn > .axp-icon {
     fill: currentColor;
     width: 24px;
     height: 24px;
+}
+
+.ax-pager > .axp-range-actions .axp-btn[disabled] > .axp-icon {
+    fill: rgba(230, 230, 230, .45);
 }
 
 .ax-pager > .axp-range-actions .axp-btn > .axp-btn-touch-target {
@@ -93,11 +93,11 @@
     transition: background-color ease 0.2s;
 }
 
-.ax-pager > .axp-range-actions .axp-ripple-btn:hover > .axp-btn-touch-target {
+.ax-pager > .axp-range-actions .axp-btn:hover > .axp-btn-touch-target {
     background-color: rgba(175, 175, 175, 0.14);
 }
 
-.ax-pager > .axp-range-actions .axp-ripple-btn:active > .axp-btn-touch-target {
+.ax-pager > .axp-range-actions .axp-btn:active > .axp-btn-touch-target {
     background-color: rgba(212, 212, 212, 0.31);
 }
 

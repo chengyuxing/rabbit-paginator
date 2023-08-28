@@ -473,7 +473,7 @@ export class axpager {
         this.panels.pagesPanel.innerHTML = '';
         this.pageNumberButtons = this.pageNumbers.map(num => {
             const btn = createElement('BUTTON', {
-                className: `axp-btn axp-ripple-btn${num === this.currentPage ? ' axp-btn-current' : ''}`,
+                className: `axp-btn${num === this.currentPage ? ' axp-btn-current' : ''}`,
                 innerHTML: `${num}<span class="axp-btn-touch-target"></span>`
             }) as HTMLButtonElement;
             this.panels.pagesPanel.appendChild(btn);
@@ -533,20 +533,11 @@ export class axpager {
         const disableFirstPrev = page <= 1;
         const disableNextLast = pages <= 1 || page === pages;
 
-        const firstPrevClz = `axp-btn${disableFirstPrev ? '' : ' axp-ripple-btn'}`;
-        const nextLastClz = `axp-btn${disableNextLast ? '' : ' axp-ripple-btn'}`;
-
         this.actions.selectPageSize.disabled = length <= 0;
-
         this.actions.btnFirst.disabled = disableFirstPrev;
-        this.actions.btnFirst.className = firstPrevClz;
         this.actions.btnPrev.disabled = disableFirstPrev;
-        this.actions.btnPrev.className = firstPrevClz;
-
         this.actions.btnNext.disabled = disableNextLast;
-        this.actions.btnNext.className = nextLastClz;
         this.actions.btnLast.disabled = disableNextLast;
-        this.actions.btnLast.className = nextLastClz;
 
         if (this.config.pageRadius < 2) {
             return;
