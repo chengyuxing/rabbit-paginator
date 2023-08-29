@@ -5,6 +5,9 @@ import {RequestInitOption} from "../../config/request-option";
  * Based on fetch api adapter.
  */
 export class FetchAdapter implements AjaxAdapter {
+    private controller: AbortController;
+    private timeoutId: number;
+
     request(url: string, pageParams: {}, option: RequestInitOption): Promise<any> {
         return new Promise<any>((resolve, reject) => {
             const method = (option.method || 'GET').toUpperCase();
@@ -42,6 +45,22 @@ export class FetchAdapter implements AjaxAdapter {
                     }
                 }
             }
+            if (this.controller) {
+                this.controller.abort();
+            }
+            if (this.timeoutId > -1) {
+                window.clearTimeout(this.timeoutId);
+                this.timeoutId = -1;
+            }
+            if (option.timeout >= 0) {
+                this.timeoutId = window.setTimeout(() => {
+                    if (this.controller) {
+                        this.controller.abort('408: request timeout, request wait time > ' + option.timeout);
+                    }
+                }, option.timeout);
+            }
+            this.controller = new AbortController();
+            initOption.signal = this.controller.signal;
             option.before(initOption);
             fetch(searchUrl, initOption)
                 .then(response => {
