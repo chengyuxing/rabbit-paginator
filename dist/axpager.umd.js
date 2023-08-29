@@ -649,6 +649,7 @@
         function FetchAdapter() {
         }
         FetchAdapter.prototype.request = function (url, pageParams, option) {
+            var _this = this;
             return new Promise(function (resolve, reject) {
                 var method = (option.method || 'GET').toUpperCase();
                 var searchUrl = url;
@@ -687,6 +688,22 @@
                         }
                     }
                 }
+                if (_this.controller) {
+                    _this.controller.abort();
+                }
+                if (_this.timeoutId > -1) {
+                    window.clearTimeout(_this.timeoutId);
+                    _this.timeoutId = -1;
+                }
+                if (option.timeout >= 0) {
+                    _this.timeoutId = window.setTimeout(function () {
+                        if (_this.controller) {
+                            _this.controller.abort('408: request timeout, request wait time > ' + option.timeout);
+                        }
+                    }, option.timeout);
+                }
+                _this.controller = new AbortController();
+                initOption.signal = _this.controller.signal;
                 option.before(initOption);
                 fetch(searchUrl, initOption)
                     .then(function (response) {

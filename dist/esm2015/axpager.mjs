@@ -656,6 +656,22 @@ class FetchAdapter {
                     }
                 }
             }
+            if (this.controller) {
+                this.controller.abort();
+            }
+            if (this.timeoutId > -1) {
+                window.clearTimeout(this.timeoutId);
+                this.timeoutId = -1;
+            }
+            if (option.timeout >= 0) {
+                this.timeoutId = window.setTimeout(() => {
+                    if (this.controller) {
+                        this.controller.abort('408: request timeout, request wait time > ' + option.timeout);
+                    }
+                }, option.timeout);
+            }
+            this.controller = new AbortController();
+            initOption.signal = this.controller.signal;
             option.before(initOption);
             fetch(searchUrl, initOption)
                 .then(response => {
