@@ -296,9 +296,9 @@ Get into `dist/example/index.html` demo preview.
 
   Http headers.
 
-- **timeout** `optional` `ajax` `XMLHttpRequestAdapter` `init`
+- **timeout** `optional` `ajax` `init`
 
-  Ajax reuqest timeout, default `-1` .
+  Ajax request timeout, default `-1` .
 
 #### Methods
 

@@ -1,5 +1,10 @@
 # change note
 
+## 1.2.2
+
+- **FetchAdapter** support property RequestInitOption#`timeout`.
+- **FetchAdapter** timeout depends on **AbortController**, require Chrome version >= 66.
+
 ## 1.2.1
 
 - Fixed bug when PageConfig#initPageNumber < 1.
