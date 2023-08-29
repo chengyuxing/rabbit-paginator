@@ -1,5 +1,6 @@
 import {ContentType, AjaxAdapter} from "../ajax-adapter";
 import {RequestInitOption} from "../../config/request-option";
+import {toURLSearchParams} from "../../utils";
 
 /**
  * Based on fetch api adapter.
@@ -21,7 +22,7 @@ export class FetchAdapter implements AjaxAdapter {
             if (method === 'GET') {
                 const req = Object.assign({}, option.data, pageParams);
                 const suffix = url.includes('?') ? '&' : '?';
-                searchUrl = searchUrl + suffix + new URLSearchParams(req as {});
+                searchUrl = searchUrl + suffix + toURLSearchParams(req);
             } else if (method === 'POST') {
                 if (option.data instanceof FormData) {
                     const fd = new FormData();
@@ -38,7 +39,7 @@ export class FetchAdapter implements AjaxAdapter {
                     } else {
                         const req = Object.assign({}, option.data, pageParams);
                         if (contentType === ContentType.URL_ENCODED) {
-                            initOption.body = new URLSearchParams(req as {});
+                            initOption.body = toURLSearchParams(req);
                         } else if (contentType === ContentType.JSON) {
                             initOption.body = JSON.stringify(req);
                         }

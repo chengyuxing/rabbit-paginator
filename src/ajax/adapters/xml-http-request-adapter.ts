@@ -1,5 +1,6 @@
 import {ContentType, AjaxAdapter} from "../ajax-adapter";
 import {RequestInitOption} from "../../config/request-option";
+import {toURLSearchParams} from "../../utils";
 
 /**
  * Base on XMLHttpRequest default implementation.
@@ -38,7 +39,7 @@ export class XMLHttpRequestAdapter implements AjaxAdapter {
             if (method === 'GET') {
                 const req = Object.assign({}, option.data, pageParams);
                 const suffix = url.includes('?') ? '&' : '?';
-                const searchUrl = url + suffix + new URLSearchParams(req as {});
+                const searchUrl = url + suffix + toURLSearchParams(req);
                 this.xhr.open(method, searchUrl, true);
                 this.xhr.send();
                 return;
@@ -62,7 +63,7 @@ export class XMLHttpRequestAdapter implements AjaxAdapter {
                 }
                 const req = Object.assign({}, option.data, pageParams);
                 if (contentType === ContentType.URL_ENCODED) {
-                    this.xhr.send(new URLSearchParams(req));
+                    this.xhr.send(toURLSearchParams(req));
                     return;
                 }
                 if (contentType === ContentType.JSON) {
