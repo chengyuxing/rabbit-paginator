@@ -11,6 +11,34 @@
     };
 
     /**
+     * create html element
+     * @param tagName tag name
+     * @param attributes attributes
+     */
+    var createElement = function (tagName, attributes) {
+        if (attributes === void 0) { attributes = {}; }
+        var e = document.createElement(tagName);
+        Object.keys(attributes).forEach(function (a) {
+            e[a] = attributes[a];
+        });
+        return e;
+    };
+    /**
+     * parse object to URLSearchParams.
+     * @param obj
+     */
+    var toURLSearchParams = function (obj) {
+        var search = new URLSearchParams();
+        if (!obj) {
+            return search;
+        }
+        Object.keys(obj).forEach(function (k) {
+            search.set(k, obj[k]);
+        });
+        return search;
+    };
+
+    /**
      * Base on XMLHttpRequest default implementation.
      */
     var XMLHttpRequestAdapter = /** @class */ (function () {
@@ -48,7 +76,7 @@
                 if (method === 'GET') {
                     var req = Object.assign({}, option.data, pageParams);
                     var suffix = url.includes('?') ? '&' : '?';
-                    var searchUrl = url + suffix + new URLSearchParams(req);
+                    var searchUrl = url + suffix + toURLSearchParams(req);
                     _this.xhr.open(method, searchUrl, true);
                     _this.xhr.send();
                     return;
@@ -72,7 +100,7 @@
                     }
                     var req = Object.assign({}, option.data, pageParams);
                     if (contentType === ContentType.URL_ENCODED) {
-                        _this.xhr.send(new URLSearchParams(req));
+                        _this.xhr.send(toURLSearchParams(req));
                         return;
                     }
                     if (contentType === ContentType.JSON) {
@@ -131,19 +159,6 @@
         backward: '<svg viewBox="0 0 24 24" focusable="false" class="axp-icon"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"></path></svg>',
         forward: '<svg viewBox="0 0 24 24" focusable="false" class="axp-icon"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg>',
         fastForward: '<svg viewBox="0 0 24 24" focusable="false" class="axp-icon"><path d="M5.59 7.41L10.18 12l-4.59 4.59L7 18l6-6-6-6zM16 6h2v12h-2z"></path></svg>',
-    };
-    /**
-     * create html element
-     * @param tagName tag name
-     * @param attributes attributes
-     */
-    var createElement = function (tagName, attributes) {
-        if (attributes === void 0) { attributes = {}; }
-        var e = document.createElement(tagName);
-        Object.keys(attributes).forEach(function (a) {
-            e[a] = attributes[a];
-        });
-        return e;
     };
     var initDomElements = Symbol('initDomElements');
     var updateActionStatus = Symbol('updateActionStatus');
@@ -410,7 +425,7 @@
                 timeout: this.option.timeout,
                 before: this.option.before
             };
-            this.config.ajaxAdapter.request(this.target, this.pageParams, initOption)
+            var p = this.config.ajaxAdapter.request(this.target, this.pageParams, initOption)
                 .then(function (response) {
                 var _a = _this.config.getPagedResource(response), data = _a.data, length = _a.length;
                 _this[updateCurrent](length);
@@ -418,8 +433,14 @@
                 _this.option.success(data, pageEvent, _this.option.data);
                 _this[updateActionStatus](pageEvent.page, pageEvent.pages, pageEvent.length);
                 _this[updateRangeLabel]();
-            }).catch(this.option.error)
-                .finally(this.option.finish);
+            });
+            if (typeof p.finally === 'function') {
+                p.catch(this.option.error)
+                    .finally(this.option.finish);
+                return;
+            }
+            p.then(function () { return _this.option.finish(); })
+                .catch(this.option.error);
         };
         /**
          * static array data paging.
@@ -594,8 +615,9 @@
          * @param length result length
          */
         axpager.prototype[updateActionStatus] = function (page, pages, length) {
+            var _this = this;
             if (this.disabled) {
-                Object.values(this.actions).forEach(function (a) { return a.disabled = true; });
+                Object.keys(this.actions).forEach(function (k) { return _this.actions[k].disabled = true; });
                 if (this.config.pageRadius < 2) {
                     return;
                 }
@@ -660,7 +682,7 @@
                 if (method === 'GET') {
                     var req = Object.assign({}, option.data, pageParams);
                     var suffix = url.includes('?') ? '&' : '?';
-                    searchUrl = searchUrl + suffix + new URLSearchParams(req);
+                    searchUrl = searchUrl + suffix + toURLSearchParams(req);
                 }
                 else if (method === 'POST') {
                     if (option.data instanceof FormData) {
@@ -680,7 +702,7 @@
                         else {
                             var req = Object.assign({}, option.data, pageParams);
                             if (contentType === ContentType.URL_ENCODED) {
-                                initOption.body = new URLSearchParams(req);
+                                initOption.body = toURLSearchParams(req);
                             }
                             else if (contentType === ContentType.JSON) {
                                 initOption.body = JSON.stringify(req);
@@ -727,7 +749,6 @@
     exports.FetchAdapter = FetchAdapter;
     exports.Paginator = axpager;
     exports.XMLHttpRequestAdapter = XMLHttpRequestAdapter;
-    exports.createElement = createElement;
     exports.init = init;
 
 }));

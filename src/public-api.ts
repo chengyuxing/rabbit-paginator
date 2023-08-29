@@ -1,5 +1,5 @@
 import {PageConfig} from "./config/page-config";
-import {axpager, createElement} from "./axpager";
+import {axpager} from "./axpager";
 import {XMLHttpRequestAdapter} from "./ajax/adapters/xml-http-request-adapter";
 import {FetchAdapter} from "./ajax/adapters/fetch-adapter";
 
@@ -11,7 +11,6 @@ const init: (container: HTMLElement, config: PageConfig) => axpager = axpager.in
 export {
     axpager as Paginator,
     init,
-    createElement,
     XMLHttpRequestAdapter,
     FetchAdapter
 };

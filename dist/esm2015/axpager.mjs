@@ -5,6 +5,33 @@ const ContentType = {
 };
 
 /**
+ * create html element
+ * @param tagName tag name
+ * @param attributes attributes
+ */
+const createElement = (tagName, attributes = {}) => {
+    const e = document.createElement(tagName);
+    Object.keys(attributes).forEach(a => {
+        e[a] = attributes[a];
+    });
+    return e;
+};
+/**
+ * parse object to URLSearchParams.
+ * @param obj
+ */
+const toURLSearchParams = (obj) => {
+    const search = new URLSearchParams();
+    if (!obj) {
+        return search;
+    }
+    Object.keys(obj).forEach(k => {
+        search.set(k, obj[k]);
+    });
+    return search;
+};
+
+/**
  * Base on XMLHttpRequest default implementation.
  */
 class XMLHttpRequestAdapter {
@@ -39,7 +66,7 @@ class XMLHttpRequestAdapter {
             if (method === 'GET') {
                 const req = Object.assign({}, option.data, pageParams);
                 const suffix = url.includes('?') ? '&' : '?';
-                const searchUrl = url + suffix + new URLSearchParams(req);
+                const searchUrl = url + suffix + toURLSearchParams(req);
                 this.xhr.open(method, searchUrl, true);
                 this.xhr.send();
                 return;
@@ -63,7 +90,7 @@ class XMLHttpRequestAdapter {
                 }
                 const req = Object.assign({}, option.data, pageParams);
                 if (contentType === ContentType.URL_ENCODED) {
-                    this.xhr.send(new URLSearchParams(req));
+                    this.xhr.send(toURLSearchParams(req));
                     return;
                 }
                 if (contentType === ContentType.JSON) {
@@ -121,18 +148,6 @@ const icons = {
     backward: '<svg viewBox="0 0 24 24" focusable="false" class="axp-icon"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"></path></svg>',
     forward: '<svg viewBox="0 0 24 24" focusable="false" class="axp-icon"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg>',
     fastForward: '<svg viewBox="0 0 24 24" focusable="false" class="axp-icon"><path d="M5.59 7.41L10.18 12l-4.59 4.59L7 18l6-6-6-6zM16 6h2v12h-2z"></path></svg>',
-};
-/**
- * create html element
- * @param tagName tag name
- * @param attributes attributes
- */
-const createElement = (tagName, attributes = {}) => {
-    const e = document.createElement(tagName);
-    Object.keys(attributes).forEach(a => {
-        e[a] = attributes[a];
-    });
-    return e;
 };
 const initDomElements = Symbol('initDomElements');
 const updateActionStatus = Symbol('updateActionStatus');
@@ -385,7 +400,7 @@ class axpager {
             timeout: this.option.timeout,
             before: this.option.before
         };
-        this.config.ajaxAdapter.request(this.target, this.pageParams, initOption)
+        const p = this.config.ajaxAdapter.request(this.target, this.pageParams, initOption)
             .then(response => {
             const { data, length } = this.config.getPagedResource(response);
             this[updateCurrent](length);
@@ -393,8 +408,14 @@ class axpager {
             this.option.success(data, pageEvent, this.option.data);
             this[updateActionStatus](pageEvent.page, pageEvent.pages, pageEvent.length);
             this[updateRangeLabel]();
-        }).catch(this.option.error)
-            .finally(this.option.finish);
+        });
+        if (typeof p.finally === 'function') {
+            p.catch(this.option.error)
+                .finally(this.option.finish);
+            return;
+        }
+        p.then(() => this.option.finish())
+            .catch(this.option.error);
     }
     /**
      * static array data paging.
@@ -567,7 +588,7 @@ class axpager {
      */
     [updateActionStatus](page, pages, length) {
         if (this.disabled) {
-            Object.values(this.actions).forEach(a => a.disabled = true);
+            Object.keys(this.actions).forEach(k => this.actions[k].disabled = true);
             if (this.config.pageRadius < 2) {
                 return;
             }
@@ -628,7 +649,7 @@ class FetchAdapter {
             if (method === 'GET') {
                 const req = Object.assign({}, option.data, pageParams);
                 const suffix = url.includes('?') ? '&' : '?';
-                searchUrl = searchUrl + suffix + new URLSearchParams(req);
+                searchUrl = searchUrl + suffix + toURLSearchParams(req);
             }
             else if (method === 'POST') {
                 if (option.data instanceof FormData) {
@@ -648,7 +669,7 @@ class FetchAdapter {
                     else {
                         const req = Object.assign({}, option.data, pageParams);
                         if (contentType === ContentType.URL_ENCODED) {
-                            initOption.body = new URLSearchParams(req);
+                            initOption.body = toURLSearchParams(req);
                         }
                         else if (contentType === ContentType.JSON) {
                             initOption.body = JSON.stringify(req);
@@ -690,5 +711,5 @@ class FetchAdapter {
  */
 const init = axpager.init;
 
-export { ContentType, FetchAdapter, axpager as Paginator, XMLHttpRequestAdapter, createElement, init };
+export { ContentType, FetchAdapter, axpager as Paginator, XMLHttpRequestAdapter, init };
 //# sourceMappingURL=axpager.mjs.map
