@@ -2,6 +2,7 @@ import {PageConfig} from "./config/page-config";
 import {RequestInitOption, RequestOption} from "./config/request-option";
 import {PageEvent} from "./config/page-event";
 import {XMLHttpRequestAdapter} from "./ajax/adapters/xml-http-request-adapter";
+import {createElement} from "./utils";
 
 // noinspection JSUnresolvedReference
 /**
@@ -47,19 +48,6 @@ const icons = {
     backward: '<svg viewBox="0 0 24 24" focusable="false" class="axp-icon"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"></path></svg>',
     forward: '<svg viewBox="0 0 24 24" focusable="false" class="axp-icon"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg>',
     fastForward: '<svg viewBox="0 0 24 24" focusable="false" class="axp-icon"><path d="M5.59 7.41L10.18 12l-4.59 4.59L7 18l6-6-6-6zM16 6h2v12h-2z"></path></svg>',
-};
-
-/**
- * create html element
- * @param tagName tag name
- * @param attributes attributes
- */
-export const createElement = (tagName: string, attributes: { [index: string]: any } = {}): HTMLElement => {
-    const e = document.createElement(tagName);
-    Object.keys(attributes).forEach(a => {
-        e[a] = attributes[a];
-    });
-    return e;
 };
 
 const initDomElements = Symbol('initDomElements');
@@ -344,7 +332,7 @@ export class axpager {
             timeout: this.option.timeout,
             before: this.option.before
         };
-        this.config.ajaxAdapter.request(this.target, this.pageParams, initOption)
+        const p = this.config.ajaxAdapter.request(this.target, this.pageParams, initOption)
             .then(response => {
                 const {data, length} = this.config.getPagedResource(response);
                 this[updateCurrent](length);
@@ -352,8 +340,14 @@ export class axpager {
                 this.option.success(data, pageEvent, this.option.data);
                 this[updateActionStatus](pageEvent.page, pageEvent.pages, pageEvent.length);
                 this[updateRangeLabel]();
-            }).catch(this.option.error)
-            .finally(this.option.finish);
+            });
+        if (typeof p.finally === 'function') {
+            p.catch(this.option.error)
+                .finally(this.option.finish);
+            return;
+        }
+        p.then(() => this.option.finish())
+            .catch(this.option.error);
     }
 
     /**
@@ -539,7 +533,7 @@ export class axpager {
      */
     [updateActionStatus](page: number, pages: number, length: number) {
         if (this.disabled) {
-            Object.values(this.actions).forEach(a => a.disabled = true);
+            Object.keys(this.actions).forEach(k => this.actions[k].disabled = true);
             if (this.config.pageRadius < 2) {
                 return;
             }
