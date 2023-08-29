@@ -1,5 +1,10 @@
 # change note
 
+## 1.2.3
+- Improved default ajax Request paging implementation **form-urlencode** compatibility.
+- Improved default compatibility for Chrome minimum version >= 49.
+- Improved default ajax request paging query params type `FormData` for Chrome minimum version >= 50.
+
 ## 1.2.2
 
 - **FetchAdapter** support property RequestInitOption#`timeout`.
