@@ -16,7 +16,7 @@ export class FetchAdapter implements AjaxAdapter {
 
             const initOption: RequestInit = {
                 method: method,
-                headers: option.headers || {},
+                headers: option.headers,
             };
 
             if (method === 'GET') {
