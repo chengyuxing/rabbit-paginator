@@ -15,8 +15,8 @@ export class FetchAdapter implements AjaxAdapter {
             let searchUrl = url;
 
             const initOption: RequestInit = {
-                method: option.method,
-                headers: option.headers,
+                method: method,
+                headers: option.headers || {},
             };
 
             if (method === 'GET') {
@@ -30,7 +30,7 @@ export class FetchAdapter implements AjaxAdapter {
                     Object.keys(pageParams).forEach(k => fd.set(k, pageParams[k]));
                     initOption.body = fd;
                 } else {
-                    const contentType = option.headers['Content-Type'] || ContentType.URL_ENCODED;
+                    const contentType = initOption.headers['Content-Type'] || ContentType.URL_ENCODED;
                     if (contentType === ContentType.FORM_DATA) {
                         const fd = new FormData();
                         Object.keys(option.data).forEach(k => fd.set(k, option.data[k]));

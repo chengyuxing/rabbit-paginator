@@ -18,7 +18,6 @@ export class XMLHttpRequestAdapter implements AjaxAdapter {
             Object.keys(option.headers).forEach(k => {
                 this.xhr.setRequestHeader(k, option.headers[k]);
             });
-            option.before(this.xhr);
             this.xhr.onload = function () {
                 if (this.readyState === 4 && this.status >= 200 && this.status < 300) {
                     resolve(this.response);
@@ -35,6 +34,7 @@ export class XMLHttpRequestAdapter implements AjaxAdapter {
             this.xhr.onerror = function () {
                 reject(this.status + ": " + (this.statusText || 'server error.'));
             };
+            option.before(this.xhr);
             const method = (option.method || 'GET').toUpperCase();
             if (method === 'GET') {
                 const req = Object.assign({}, option.data, pageParams);
@@ -72,6 +72,7 @@ export class XMLHttpRequestAdapter implements AjaxAdapter {
                 }
                 this.xhr.abort();
                 reject('Not support Content-Type: ' + contentType);
+                return;
             }
             reject('Not support ' + method + ' method.');
         });
