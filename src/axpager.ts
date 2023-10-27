@@ -22,7 +22,7 @@ const defaultPageConfig: PageConfig = {
     pageRadius: 0,
     pageNumbersType: 'button',
     pageSizeOptions: [10, 15, 30],
-    ajaxAdapter: new XMLHttpRequestAdapter(),
+    ajaxAdapter: () => new XMLHttpRequestAdapter(),
     getRangeLabel: (page, size, pages, length) => `第${page}/${pages}页，共${length}条`,
     getPageParams: (page, size) => ({page: page, size: size}),
     getPagedResource: response => ({data: response.data, length: response.pager.recordCount}),
@@ -332,7 +332,7 @@ export class axpager {
             timeout: this.option.timeout,
             before: this.option.before
         };
-        const p = this.config.ajaxAdapter.request(this.target, this.pageParams, initOption)
+        const p = this.config.ajaxAdapter().request(this.target, this.pageParams, initOption)
             .then(response => {
                 const {data, length} = this.config.getPagedResource(response);
                 this[updateCurrent](length);
