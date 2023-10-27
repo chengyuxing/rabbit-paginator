@@ -41,7 +41,7 @@ export interface PageConfig {
      * @see XMLHttpRequestAdapter
      * @see FetchAdapter
      */
-    ajaxAdapter?: AjaxAdapter;
+    ajaxAdapter?: () => AjaxAdapter;
     /**
      * get necessary ajax request page params.
      */

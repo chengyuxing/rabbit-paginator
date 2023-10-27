@@ -230,11 +230,15 @@ Get into `dist/example/index.html` demo preview.
 
   Last page button title text, default `最后一页` .
 
+#### Methods
+
 - **ajaxAdapter** `optional` `ajax`
 
-  ajax request adapter, custom ajax request implementation, default `XMLHttpRequestAdapter`  .
+  Ajax request adapter, custom ajax request implementation, default:
 
-#### Methods
+  ```typescript
+  () => new XMLHttpRequestAdapter()
+  ```
 
 - **getRangeLabel** `optional`
 

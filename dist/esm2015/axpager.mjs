@@ -45,7 +45,6 @@ class XMLHttpRequestAdapter {
             Object.keys(option.headers).forEach(k => {
                 this.xhr.setRequestHeader(k, option.headers[k]);
             });
-            option.before(this.xhr);
             this.xhr.onload = function () {
                 if (this.readyState === 4 && this.status >= 200 && this.status < 300) {
                     resolve(this.response);
@@ -62,6 +61,7 @@ class XMLHttpRequestAdapter {
             this.xhr.onerror = function () {
                 reject(this.status + ": " + (this.statusText || 'server error.'));
             };
+            option.before(this.xhr);
             const method = (option.method || 'GET').toUpperCase();
             if (method === 'GET') {
                 const req = Object.assign({}, option.data, pageParams);
@@ -99,6 +99,7 @@ class XMLHttpRequestAdapter {
                 }
                 this.xhr.abort();
                 reject('Not support Content-Type: ' + contentType);
+                return;
             }
             reject('Not support ' + method + ' method.');
         });
@@ -123,7 +124,7 @@ const defaultPageConfig = {
     pageRadius: 0,
     pageNumbersType: 'button',
     pageSizeOptions: [10, 15, 30],
-    ajaxAdapter: new XMLHttpRequestAdapter(),
+    ajaxAdapter: () => new XMLHttpRequestAdapter(),
     getRangeLabel: (page, size, pages, length) => `第${page}/${pages}页，共${length}条`,
     getPageParams: (page, size) => ({ page: page, size: size }),
     getPagedResource: response => ({ data: response.data, length: response.pager.recordCount }),
@@ -400,7 +401,7 @@ class axpager {
             timeout: this.option.timeout,
             before: this.option.before
         };
-        const p = this.config.ajaxAdapter.request(this.target, this.pageParams, initOption)
+        const p = this.config.ajaxAdapter().request(this.target, this.pageParams, initOption)
             .then(response => {
             const { data, length } = this.config.getPagedResource(response);
             this[updateCurrent](length);
@@ -643,7 +644,7 @@ class FetchAdapter {
             const method = (option.method || 'GET').toUpperCase();
             let searchUrl = url;
             const initOption = {
-                method: option.method,
+                method: method,
                 headers: option.headers,
             };
             if (method === 'GET') {
@@ -659,7 +660,7 @@ class FetchAdapter {
                     initOption.body = fd;
                 }
                 else {
-                    const contentType = option.headers['Content-Type'] || ContentType.URL_ENCODED;
+                    const contentType = initOption.headers['Content-Type'] || ContentType.URL_ENCODED;
                     if (contentType === ContentType.FORM_DATA) {
                         const fd = new FormData();
                         Object.keys(option.data).forEach(k => fd.set(k, option.data[k]));

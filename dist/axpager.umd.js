@@ -55,7 +55,6 @@
                 Object.keys(option.headers).forEach(function (k) {
                     _this.xhr.setRequestHeader(k, option.headers[k]);
                 });
-                option.before(_this.xhr);
                 _this.xhr.onload = function () {
                     if (this.readyState === 4 && this.status >= 200 && this.status < 300) {
                         resolve(this.response);
@@ -72,6 +71,7 @@
                 _this.xhr.onerror = function () {
                     reject(this.status + ": " + (this.statusText || 'server error.'));
                 };
+                option.before(_this.xhr);
                 var method = (option.method || 'GET').toUpperCase();
                 if (method === 'GET') {
                     var req = Object.assign({}, option.data, pageParams);
@@ -109,6 +109,7 @@
                     }
                     _this.xhr.abort();
                     reject('Not support Content-Type: ' + contentType);
+                    return;
                 }
                 reject('Not support ' + method + ' method.');
             });
@@ -134,7 +135,7 @@
         pageRadius: 0,
         pageNumbersType: 'button',
         pageSizeOptions: [10, 15, 30],
-        ajaxAdapter: new XMLHttpRequestAdapter(),
+        ajaxAdapter: function () { return new XMLHttpRequestAdapter(); },
         getRangeLabel: function (page, size, pages, length) { return "\u7B2C".concat(page, "/").concat(pages, "\u9875\uFF0C\u5171").concat(length, "\u6761"); },
         getPageParams: function (page, size) { return ({ page: page, size: size }); },
         getPagedResource: function (response) { return ({ data: response.data, length: response.pager.recordCount }); },
@@ -425,7 +426,7 @@
                 timeout: this.option.timeout,
                 before: this.option.before
             };
-            var p = this.config.ajaxAdapter.request(this.target, this.pageParams, initOption)
+            var p = this.config.ajaxAdapter().request(this.target, this.pageParams, initOption)
                 .then(function (response) {
                 var _a = _this.config.getPagedResource(response), data = _a.data, length = _a.length;
                 _this[updateCurrent](length);
@@ -676,7 +677,7 @@
                 var method = (option.method || 'GET').toUpperCase();
                 var searchUrl = url;
                 var initOption = {
-                    method: option.method,
+                    method: method,
                     headers: option.headers,
                 };
                 if (method === 'GET') {
@@ -692,7 +693,7 @@
                         initOption.body = fd_1;
                     }
                     else {
-                        var contentType = option.headers['Content-Type'] || ContentType.URL_ENCODED;
+                        var contentType = initOption.headers['Content-Type'] || ContentType.URL_ENCODED;
                         if (contentType === ContentType.FORM_DATA) {
                             var fd_2 = new FormData();
                             Object.keys(option.data).forEach(function (k) { return fd_2.set(k, option.data[k]); });
